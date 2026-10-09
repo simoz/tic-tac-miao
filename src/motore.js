@@ -48,16 +48,7 @@ function voiceScore(v){const n=v.name.toLowerCase();let s=0;
   if(/compact|espeak/.test(n))s-=40;if(v.localService===false)s+=5;return s;}
 function loadVoices(){try{voices=speechSynthesis.getVoices().filter(v=>/^it/i.test(v.lang)).sort((a,b)=>voiceScore(b)-voiceScore(a));}catch(e){voices=[];}chosen=voices[0]||null;}
 try{loadVoices();speechSynthesis.onvoiceschanged=loadVoices;}catch(e){}
-const VOX={emma:{pitch:.95,rate:.82},girl:{pitch:1.3,rate:.95},simone:{pitch:.9,rate:.92},lettere:{pitch:1.1,rate:.8},cat:{pitch:1.15,rate:.9}};
-/* Frasi registrate: audio/voce/<prefisso><numero>.mp3 nell'ordine della lista (le prime 11 di zio Simone vengono da Maci e Piumi) */
-const PREFIX={simone:'o'};
-const LINES={
-  simone:['CIAO MACI!','VAI DALLA ZIA SILVIA.','I MIEI ROBOTTINI SONO SCAPPATI!','MI AIUTI A PRENDERLI?','CORRI, MACI!','I MIEI ROBOTTINI!','GRAZIE MACI!','GUARDA IL COMPUTER!','CIAO PIUMI!','CORRI, PIUMI!','GRAZIE PIUMI!',
-    'SONO USCITI DAL COMPUTER.','OGNI ROBOTTINO HA UNA LETTERA.','PREMI LA STESSA LETTERA SULLA TASTIERA!','COSÌ IL ROBOTTINO TORNA A CASA.','BRAVO MACI!','BRAVA PIUMI!',
-    'ADESSO IL TASTO NON BRILLA SUBITO!','GUARDA! INSIEME FANNO UNA PAROLA!','IL COMPUTER HA DETTO MIAO!','PREMI INVIO PER ANDARE AVANTI.','CERCA IL TASTO CHE BRILLA!']
-};
-/* lettere e numeri registrati: audio/lettere/<tasto>.mp3 */
-const LETTER_CLIPS=new Set([...'AEIOUM']);
+const VOX={emma:{pitch:.95,rate:.82},luisa:{pitch:.95,rate:.85},giulio:{pitch:.8,rate:.9},mile:{pitch:1.05,rate:.9},girl:{pitch:1.3,rate:.95},simone:{pitch:.9,rate:.92},lettere:{pitch:1.1,rate:.8},cat:{pitch:1.15,rate:.9}};
 let clip=null,voice=true;
 function stopVoice(){try{speechSynthesis.cancel();}catch(e){}if(clip){clip.pause();clip=null;}}
 function playClip(src,fallback){clip=new Audio(src);clip.play().catch(fallback);clip.onerror=fallback;}
@@ -65,19 +56,28 @@ function say(t,who){if(!voice)return;stopVoice();
   const k=(LINES[who]||[]).indexOf(t);
   if(k>=0){playClip('audio/voce/'+PREFIX[who]+String(k+1).padStart(2,'0')+'.mp3',()=>ttsSay(t,who));return;}
   ttsSay(t,who);}
-function sayKey(id){if(!voice||!NOME[id])return;stopVoice();
-  if(LETTER_CLIPS.has(id))playClip('audio/lettere/'+id+'.mp3',()=>ttsSay(NOME[id],'lettere'));
-  else ttsSay(NOME[id],'lettere');}
+/* parole, lettere e numeri con la voce "maestra" */
+const PAROLE_SET=new Set(PAROLE);
+const slug=t=>t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+function sayWord(t){if(!voice||!t)return;stopVoice();
+  if(PAROLE_SET.has(t))playClip('audio/parole/'+slug(t)+'.mp3',()=>ttsSay(t,'lettere'));else ttsSay(t,'lettere');}
+const sayKey=id=>sayWord(NOME[id]);
+/* più parole una dopo l'altra (per contare: uno, due, tre...) */
+let sayTimers=[];
+function sayList(list,gap){sayTimers.forEach(clearTimeout);sayTimers=list.map((t,i)=>setTimeout(()=>sayWord(t),i*(gap||650)));}
 function ttsSay(t,who){try{speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(t.toLowerCase().replace(/!/g,'! ').replace(/\./g,'. '));u.lang='it-IT';if(chosen)u.voice=chosen;
   const p=VOX[who]||VOX.cat;u.pitch=p.pitch;u.rate=p.rate;speechSynthesis.speak(u);}catch(e){}}
 
 /* ---------- dialoghi (OK si preme anche con INVIO) ---------- */
-const NAMES={emma:'EMMA',girl:'MARGHERITA',simone:'ZIO SIMONE'};
+const NAMES={emma:'EMMA',girl:'MARGHERITA',simone:'ZIO SIMONE',luisa:'NONNA LUISA',giulio:'ZIO GIULIO',mile:'ZIA MILE'};
 const PORTRAIT={
   emma:p=>{p.setTransform(2.6,0,0,2.6,0,0);drawCat(p,30,74,CATS.emma,{sit:true,f:1,t:0,noShadow:true});},
   girl:p=>{p.setTransform(2.4,0,0,2.4,0,0);drawGirl(p,38,148,{t:0,noShadow:true});},
-  simone:p=>{p.setTransform(2.2,0,0,2.2,0,0);drawPerson(p,42,145,{kind:'simone',noShadow:true});}
+  simone:p=>{p.setTransform(2.2,0,0,2.2,0,0);drawPerson(p,42,145,{kind:'simone',noShadow:true});},
+  luisa:p=>{p.setTransform(2.2,0,0,2.2,0,0);drawPerson(p,42,150,{kind:'luisa',glasses:true,noShadow:true});},
+  giulio:p=>{p.setTransform(2.2,0,0,2.2,0,0);drawPerson(p,42,145,{kind:'giulio',noShadow:true});},
+  mile:p=>{p.setTransform(2.2,0,0,2.2,0,0);drawPerson(p,42,150,{kind:'mile',noShadow:true});}
 };
 let dlg=null;
 function openDialog(who,pages,done){

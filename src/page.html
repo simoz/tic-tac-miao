@@ -58,6 +58,7 @@ body.intro .party .pc:not(.mus){display:none}
 .lvl{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--paper-2);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);text-align:left}
 .lvl:not(:disabled):hover{background:var(--gold)}
 .lvl:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.levels .lvl:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;min-width:50%}
 .lvl:disabled{opacity:.55;cursor:default}
 .lvl b{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:#fff8e6;border:3px solid var(--ink);box-shadow:0 3px 0 var(--ink);font-size:22px}
 .lvl span{display:flex;flex-direction:column;font-weight:600;font-size:17px;line-height:1.1}

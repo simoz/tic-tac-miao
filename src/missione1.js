@@ -8,7 +8,8 @@ const SIMP={x:880,y:425,s:1.6};
 const ROBOT_COL=['#cfd3e0','#8fc8ff','#ffd36a','#a8e08f','#f9b4c8'];
 const HINT=[0,2.5,5];              /* dopo quanti secondi brilla il tasto, per ogni zampa */
 const robotSVG=on=>`<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 6V3" stroke="#3b2a35" stroke-width="1.6"/><circle cx="13" cy="2.6" r="2" fill="${on?'#e5533d':'#cbbf9f'}"/><rect x="7" y="6" width="12" height="8" rx="2.5" fill="${on?'#8fc8ff':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.5"/><circle cx="11" cy="10" r="1.2" fill="${on?'#2b2a33':'#cbbf9f'}"/><circle cx="15" cy="10" r="1.2" fill="${on?'#2b2a33':'#cbbf9f'}"/><rect x="6" y="14.5" width="14" height="8" rx="2.5" fill="${on?'#8fc8ff':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.5"/><circle cx="9" cy="24" r="1.8" fill="#3b2a35"/><circle cx="17" cy="24" r="1.8" fill="#3b2a35"/></svg>`;
-let S;
+let S,timers=[];
+const after=(sec,fn)=>timers.push({t:sec,fn});
 
 /* tre ondate: le vocali, ancora le vocali mescolate, poi quattro robottini che scrivono MIAO */
 function vocali6(){const v=[...'AEIOU'],out=[];while(out.length<6){const k=v[Math.floor(Math.random()*5)];if(k!=out[out.length-1])out.push(k);}return out;}
@@ -39,7 +40,7 @@ function key(id){
     hud();
   }else{
     if(KEYS[id])KEYS[id].shake=1;sfx.boop();m.err++;m.no=1;S.rErr++;S.err++;segna(m.l,false);
-    if(m.err==2){floatText(CATP.x+10,CATP.y-110,'MIAO?','#fff',30);setTimeout(()=>{if(m.phase=='wait')sayKey(m.l);},350);}
+    if(m.err==2){floatText(CATP.x+10,CATP.y-110,'MIAO?','#fff',30);after(.35,()=>{if(m.phase=='wait')sayKey(m.l);});}
   }
 }
 
@@ -54,17 +55,18 @@ function endRound(){
     if(S.rErr>=5&&S.zampa>0)S.zampa--;
     openDialog('simone',[b,'GUARDA! INSIEME FANNO UNA PAROLA!'],()=>startRound(2));
   }else{
-    S.flash={txt:'MIAO!',t:3};sfx.meow();setTimeout(sfx.meow,300);floatText(CATP.x+10,CATP.y-120,'MIAO!','#ffd23d',40);
-    setTimeout(()=>openDialog('simone',['IL COMPUTER HA DETTO MIAO!','I MIEI ROBOTTINI!',`GRAZIE ${N()}!`],()=>{
+    S.flash={txt:'MIAO!',t:3};sfx.meow();after(.3,sfx.meow);floatText(CATP.x+10,CATP.y-120,'MIAO!','#ffd23d',40);
+    after(1.3,()=>openDialog('simone',['IL COMPUTER HA DETTO MIAO!','I MIEI ROBOTTINI!',`GRAZIE ${N()}!`],()=>{
       sfx.win();confetti(500,200);S.finished=true;
       const stelle=S.err<=2?3:S.err<=6?2:1;
       SAVE.stelle[0]=Math.max(SAVE.stelle[0]||0,stelle);SAVE.zampa[0]=S.zampa;save();
-      setTimeout(()=>showEnd(stelle,'I robottini sono tornati nel computer di zio Simone!'),1600);
-    }),1300);
+      after(1.6,()=>showEnd(stelle,'I robottini sono tornati nel computer di zio Simone!'));
+    }));
   }
 }
 
 function update(dt){
+  const ts=timers;timers=[];ts.forEach(t=>{t.t-=dt;if(t.t<=0)t.fn();else timers.push(t);});
   S.hop=Math.max(0,S.hop-dt*3);S.wave=Math.max(0,S.wave-dt);
   if(S.flash){S.flash.t-=dt;if(S.flash.t<=0)S.flash=null;}
   if(!S.queue)return;
@@ -72,14 +74,14 @@ function update(dt){
     m.no=Math.max(0,m.no-dt*2);
     if(m.phase=='out'){m.t+=dt/.9;if(m.t<0)return;const t=Math.min(1,m.t),e=1-Math.pow(1-t,3);
       m.x=HOME.x+(m.tx-HOME.x)*e;m.y=HOME.y+(m.ty-HOME.y)*e-Math.sin(t*Math.PI)*90;m.s=.2+(m.ts-.2)*e;
-      if(t>=1){m.phase='wait';m.wt=0;if(m===current()||S.word==null)setTimeout(()=>{if(m.phase=='wait'&&m===current())sayKey(m.l);},250);}}
+      if(t>=1){m.phase='wait';m.wt=0;if(m===current()||S.word==null)after(.25,()=>{if(m.phase=='wait'&&m===current())sayKey(m.l);});}}
     else if(m.phase=='wait')m.wt+=dt;
     else if(m.phase=='home'){m.t+=dt/.7;const t=Math.min(1,m.t),e=t*t;
       m.x=m.fx+(HOME.x-m.fx)*e;m.y=m.fy+(HOME.y-m.fy)*e-Math.sin(t*Math.PI)*110;m.s=m.fs+(.15-m.fs)*e;
       if(t>=1){m.phase='gone';S.doneN++;burst(HOME.x,HOME.y,14,['#5cff7a','#6ab8ff','#ffc93d']);
-        if(S.doneN>=S.total){S.queue=null;setProg('');setTimeout(endRound,500);}
-        else if(S.word==null)setTimeout(nextRobot,300);
-        else{const n=current();if(n&&n.phase=='wait')setTimeout(()=>{if(n.phase=='wait'&&n===current())sayKey(n.l);},200);}}}
+        if(S.doneN>=S.total){S.queue=null;setProg('');after(.5,endRound);}
+        else if(S.word==null)after(.3,nextRobot);
+        else{const n=current();if(n&&n.phase=='wait')after(.2,()=>{if(n.phase=='wait'&&n===current())sayKey(n.l);});}}}
   });
 }
 
@@ -146,9 +148,9 @@ function kbOpts(){
 }
 
 MISSIONS.push({
-  name:'Il computer di zio Simone',sub:'A E I O U',who:'simone',ready:true,music:'audio/computer.mp3',
+  name:'Il computer di zio Simone',sub:'A E I O U',who:'simone',ready:true,music:'audio/m1.mp3',
   start(){
-    S={zampa:SAVE.zampa[0]||0,err:0,rErr:0,hop:0,wave:0,flash:null,queue:null,word:null,round:-1,finished:false};
+    timers=[];S={zampa:SAVE.zampa[0]||0,err:0,rErr:0,hop:0,wave:0,flash:null,queue:null,word:null,round:-1,finished:false};
     hud();setProg('');
     openDialog('simone',[`CIAO ${N()}!`,'I MIEI ROBOTTINI SONO SCAPPATI!','SONO USCITI DAL COMPUTER.','OGNI ROBOTTINO HA UNA LETTERA.','PREMI LA STESSA LETTERA SULLA TASTIERA!','COSÌ IL ROBOTTINO TORNA A CASA.'],()=>startRound(0));
   },

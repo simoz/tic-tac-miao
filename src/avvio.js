@@ -1,8 +1,4 @@
 /* ===== Avvio: schermate, tastiera vera e toccata, ciclo del gioco ===== */
-/* le missioni che arriveranno */
-[['I libri di nonna Luisa','LE LETTERE'],['I gomitoli di Emma','LE SILLABE'],["L'orto di zio Giulio",'CONTARE'],['Il pollaio di zia Mile','PIÙ'],
- ['I mirtilli di nonna Lucy','MENO'],['Le bolle di papà','LE PAROLE'],['La festa di Margherita e Rebecca','IL DETTATO']].forEach(([name,sub])=>MISSIONS.push({name,sub,ready:false}));
-
 const $=id=>document.getElementById(id);
 const starSVG=on=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="${on?'#ffc93d':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
 
@@ -13,7 +9,7 @@ function show(scr){
 function goIntro(){show('intro');introReset();}
 function goMenu(){
   if(dlg){dlg=null;$('dlg').hidden=true;document.body.classList.remove('talking');}
-  stopVoice();M=null;show('menu');floats=[];parts=[];playMusic('audio/intro.mp3');
+  stopVoice();sayTimers.forEach(clearTimeout);M=null;show('menu');floats=[];parts=[];playMusic('audio/intro.mp3');
   $('levels').innerHTML=MISSIONS.map((m,i)=>`<button class="lvl" data-m="${i}" ${m.ready?'':'disabled'}><b>${i+1}</b><span>${m.name}<small>${m.sub}</small>${m.ready?(SAVE.stelle[i]?`<i>${'★'.repeat(SAVE.stelle[i])}</i>`:''):'<i>PRESTO!</i>'}</span></button>`).join('');
   $('levels').querySelectorAll('.lvl').forEach(b=>b.onclick=()=>play(+b.dataset.m));
 }
@@ -81,4 +77,4 @@ setCat(SAVE.cur);$('bMus').classList.toggle('on',musicOn);
 drawPortraits();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawPortraits);
 goIntro();music.src='audio/intro.mp3';if(musicOn)music.play().catch(()=>{});
 requestAnimationFrame(frame);
-if(location.hash=='#debug')window.__ttm={get SCR(){return SCR;},play,goMenu,pressKey,SAVE,step:dt=>{T+=dt;update(dt);}};
+if(location.hash=='#debug')window.__ttm={get SCR(){return SCR;},play,goMenu,pressKey,SAVE,step:dt=>{T+=dt;update(dt);},get target(){return M&&M.kbOpts?M.kbOpts().target:null;}};

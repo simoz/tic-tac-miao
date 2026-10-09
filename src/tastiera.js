@@ -16,10 +16,6 @@ addKey('INVIO',12.8,1,1.9,2);
 addKey('SPAZIO',3.6,4,6.2,1);
 const LABEL={CANC:'⌫ CANCELLA',INVIO:'INVIO ⏎',SPAZIO:''};
 
-/* nome di ogni lettera, come si dice a voce */
-const NOME={A:'a',B:'bi',C:'ci',D:'di',E:'e',F:'effe',G:'gi',H:'acca',I:'i',J:'i lunga',K:'cappa',L:'elle',M:'emme',N:'enne',O:'o',P:'pi',Q:'cu',R:'erre',S:'esse',T:'ti',U:'u',V:'vu',W:'doppia vu',X:'ics',Y:'ipsilon',Z:'zeta',
-  '0':'zero','1':'uno','2':'due','3':'tre','4':'quattro','5':'cinque','6':'sei','7':'sette','8':'otto','9':'nove',SPAZIO:'spazio',INVIO:'invio',CANC:'cancella'};
-
 /* dal tasto premuto sulla tastiera vera al nome del tasto disegnato */
 function keyId(e){
   if(e.key=='Enter')return 'INVIO';if(e.key=='Backspace'||e.key=='Delete')return 'CANC';if(e.key==' ')return 'SPAZIO';

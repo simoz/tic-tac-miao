@@ -5,8 +5,14 @@ Un gioco per imparare la tastiera, le lettere e i primi conti, con Maci, Piumi, 
 Maci e Piumi camminano sulla tastiera: ogni tasto giusto fa succedere qualcosa.
 
 ## Missioni
-1. **Il computer di zio Simone**: i robottini scappano dal computer, ognuno con una lettera (A E I O U). Si preme la stessa lettera e il robottino torna a casa. Alla fine quattro robottini scrivono MIAO.
-2. …8. in arrivo: lettere, sillabe, contare, più, meno, parole, dettato.
+Ogni missione ha tre turni e una musica di un genere diverso.
+1. **Il computer di zio Simone** (A E I O U, chiptune): i robottini scappano dal computer, ognuno con una vocale. Alla fine quattro robottini scrivono MIAO.
+2. **I libri di nonna Luisa** (le lettere, swing jazz): cadono i libri, ognuno con una consonante e una figura (M come MELA). Alla fine si scrive NONNA.
+3. **I gomitoli di Emma** (le sillabe, valzer con la fisarmonica): MA ME MI MO MU, poi PA, LA, TA…, poi le parole MELA, LUNA, SOLE. Con ogni gomitolo cresce la sciarpa per Margherita.
+4. **L'orto di zio Giulio** (contare, bluegrass): quante carote? Si preme il numero, poi le carote si contano a voce mentre saltano nel cesto. Alla fine i pomodori.
+5. **Il pollaio di zia Mile** (più, funk): 2 uova nel nido, la gallina ne fa altre 3: quante in tutto?
+
+Dopo due errori il personaggio aiuta: ripete la lettera, o conta insieme le carote e le uova una per una.
 
 ## Come si gioca
 - Si gioca con la tastiera vera; sullo schermo c'è la stessa tastiera, colorata per dito (mignolo rosa, anulare giallo, medio verde, indici azzurro e viola, pollici arancio). Su F e J ci sono le zampette, come le tacche dei tasti veri.
@@ -16,15 +22,20 @@ Maci e Piumi camminano sulla tastiera: ogni tasto giusto fa succedere qualcosa.
 - Sul tablet si possono toccare i tasti disegnati.
 
 ## File
+- `src/voci.js`: tutte le frasi dei personaggi e le parole lette ad alta voce
 - `src/motore.js`: schermo, audio, voci, dialoghi, salvataggi
 - `src/personaggi.js`: i personaggi, copiati da Maci e Piumi
 - `src/tastiera.js`: la tastiera italiana disegnata
 - `src/intro.js`: Maci e Piumi scrivono TIC TAC MIAO camminando sui tasti
-- `src/missione1.js`: il computer di zio Simone
+- `src/icone.js`: le figure (mela, palla, luna…), gomitoli, uova, cesti
+- `src/quiz.js`: il giro comune delle missioni 2–5 (turni, aiuti, zampe, stelle)
+- `src/missione1.js` … `src/missione5.js`: le missioni
 - `src/avvio.js`: schermate e ciclo del gioco
 - `build.sh`: unisce `src/` in `index.html`
+- `genera-voci.sh`: genera con edge-tts le frasi e le parole che mancano
 
 ## Crediti
-- Musica provvisoria: "Meow" (intro) e "Cozy Computer Corner" (zio Simone) da Maci e Piumi, create con [Suno](https://suno.com)
-- Voce di zio Simone: Microsoft Diego (edge-tts); lettere: Microsoft Elsa (edge-tts)
+- Musiche create con [Suno](https://suno.com): intro provvisoria ("Meow" da Maci e Piumi), m1–m5 per le missioni
+- Voci con edge-tts: zio Simone (Diego), nonna Luisa e zia Mile (Isabella), zio Giulio (Giuseppe), lettere e numeri (Elsa). Le frasi già presenti in Maci e Piumi sono le stesse.
+- Voce di Emma: le frasi di Maci e Piumi sono fatte con [ElevenLabs](https://elevenlabs.io); quelle nuove per ora sono provvisorie (Elsa)
 - Font: [Fredoka](https://fonts.google.com/specimen/Fredoka)

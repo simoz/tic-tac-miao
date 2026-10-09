@@ -1,0 +1,25 @@
+/* ===== Voci: frasi dei personaggi e parole lette ad alta voce =====
+   Frasi: audio/voce/<prefisso><numero>.mp3 nell'ordine delle liste. Le prime frasi di ogni personaggio
+   vengono da Maci e Piumi; le altre si generano con ./genera-voci.sh (crea solo i file che mancano).
+   Parole (lettere, numeri, sillabe): audio/parole/<parola>.mp3 */
+const PREFIX={simone:'o',luisa:'l',emma:'e',giulio:'u',mile:'i'};
+const LINES={
+  simone:['CIAO MACI!','VAI DALLA ZIA SILVIA.','I MIEI ROBOTTINI SONO SCAPPATI!','MI AIUTI A PRENDERLI?','CORRI, MACI!','I MIEI ROBOTTINI!','GRAZIE MACI!','GUARDA IL COMPUTER!','CIAO PIUMI!','CORRI, PIUMI!','GRAZIE PIUMI!',
+    'SONO USCITI DAL COMPUTER.','OGNI ROBOTTINO HA UNA LETTERA.','PREMI LA STESSA LETTERA SULLA TASTIERA!','COSÌ IL ROBOTTINO TORNA A CASA.','BRAVO MACI!','BRAVA PIUMI!',
+    'ADESSO IL TASTO NON BRILLA SUBITO!','GUARDA! INSIEME FANNO UNA PAROLA!','IL COMPUTER HA DETTO MIAO!','PREMI INVIO PER ANDARE AVANTI.','CERCA IL TASTO CHE BRILLA!'],
+  luisa:['CIAO PIUMI!','NON TROVO I MIEI OCCHIALI.','MI AIUTI A CERCARLI?','CERCA BENE, PIUMI!','I MIEI OCCHIALI!','GRAZIE PIUMI! ORA CI VEDO.','VAI DAL NONNO GIAN.','GIOCA CON MARGHERITA!','VIENI AL TAVOLO!','ECCO TÈ E BISCOTTI!','BRAVA PIUMI!','TUTTI A MERENDA!',
+    'CIAO MACI!','CERCA BENE, MACI!','GRAZIE MACI! ORA CI VEDO.','BRAVO MACI!','GRAZIE PIUMI!','GRAZIE MACI!',
+    'SONO CADUTI TUTTI I MIEI LIBRI!','OGNI LIBRO HA UNA LETTERA.','PREMI LA LETTERA E IL LIBRO TORNA A POSTO.','ADESSO IL TASTO NON BRILLA SUBITO!','CERCA IL TASTO CHE BRILLA!','ADESSO SCRIVI NONNA!','TUTTI I LIBRI SONO A POSTO!'],
+  emma:['CIAO MACI!','CIAO PIUMI!','OGGI È LA FESTA DI MARGHERITA.','TROVA 3 MARGHERITE!','NON HAI ANCORA MARGHERITE.','HAI 1 MARGHERITA.','HAI 2 MARGHERITE.','NE MANCANO 3!','NE MANCANO 2!','NE MANCA 1!','BRAVO! CHE BELLE!','BRAVA! CHE BELLE!','SERVE UN NASTRO.','CERCA SOTTO IL VASO!','IL NASTRO È SOTTO UN VASO.','PROVA TUTTI I VASI!','CORRI!','PORTA I FIORI A MARGHERITA!','MIAO! CHE BELLA FESTA!',
+    'FACCIO UNA SCIARPA PER MARGHERITA.','OGNI GOMITOLO HA UNA SILLABA.','SCRIVI LA SILLABA CON DUE TASTI!','BRAVO MACI!','BRAVA PIUMI!','ADESSO IL TASTO NON BRILLA SUBITO!','CERCA IL TASTO CHE BRILLA!','ADESSO LE PAROLE!','LA SCIARPA È PRONTA!','GRAZIE MACI!','GRAZIE PIUMI!'],
+  giulio:['CIAO MACI!',"MI AIUTI NELL'ORTO?",'RACCOGLI 3 CAROTE!','CERCA LE FOGLIE GRANDI!','CHE BELLE CAROTE!','GRAZIE MACI!','VAI DALLA ZIA MILE.','TUTTI A TAVOLA!','CIAO PIUMI!','GRAZIE PIUMI!',
+    'RACCOGLIAMO LE CAROTE!','CONTA LE CAROTE.','PREMI IL NUMERO GIUSTO!','QUANTE CAROTE?','BRAVO MACI!','BRAVA PIUMI!','ADESSO IL TASTO NON BRILLA SUBITO!','CERCA IL TASTO CHE BRILLA!','ADESSO I POMODORI!','QUANTI POMODORI?','CHE BEL CESTO!'],
+  mile:['CIAO MACI!','VAI DALLO ZIO GIULIO.','LE GALLINE SONO SCAPPATE!','RIPORTALE NEL POLLAIO!','CORRI, MACI!','GRAZIE MACI!','PRENDI LE UOVA!','CHE BELLE UOVA!','FACCIAMO LA FRITTATA.','ECCO LA FRITTATA!','BRAVO MACI!','CIAO PIUMI!','CORRI, PIUMI!','GRAZIE PIUMI!','BRAVA PIUMI!',
+    'LE GALLINE FANNO LE UOVA.','CONTA TUTTE LE UOVA!','QUANTE UOVA IN TUTTO?','ADESSO IL TASTO NON BRILLA SUBITO!','CERCA IL TASTO CHE BRILLA!','ADESSO TANTE UOVA!']
+};
+/* le parole lette con la voce "maestra" (lettere, numeri, sillabe, parole delle immagini) */
+const NOME={A:'a',B:'bi',C:'ci',D:'di',E:'e',F:'effe',G:'gi',H:'acca',I:'i',J:'i lunga',K:'cappa',L:'elle',M:'emme',N:'enne',O:'o',P:'pi',Q:'cu',R:'erre',S:'esse',T:'ti',U:'u',V:'vu',W:'doppia vu',X:'ics',Y:'ipsilon',Z:'zeta',
+  '0':'zero','1':'uno','2':'due','3':'tre','4':'quattro','5':'cinque','6':'sei','7':'sette','8':'otto','9':'nove',SPAZIO:'spazio',INVIO:'invio',CANC:'cancella'};
+const FIGURE={M:'mela',P:'palla',L:'luna',T:'tazza',S:'sole',N:'nuvola',R:'rana',D:'dado'};
+const SILLABE=[...'MPLTNS'].flatMap(c=>[...'AEIOU'].map(v=>(c+v).toLowerCase()));
+const PAROLE=[...new Set([...Object.values(NOME),...Object.entries(FIGURE).map(([k,w])=>NOME[k]+' come '+w),...SILLABE,'mela','luna','sole','nonna','più','fa'])];

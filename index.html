@@ -66,6 +66,7 @@ body.intro .party .pc:not(.mus){display:none}
 .lvl{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--paper-2);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);text-align:left}
 .lvl:not(:disabled):hover{background:var(--gold)}
 .lvl:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.levels .lvl:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;min-width:50%}
 .lvl:disabled{opacity:.55;cursor:default}
 .lvl b{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:#fff8e6;border:3px solid var(--ink);box-shadow:0 3px 0 var(--ink);font-size:22px}
 .lvl span{display:flex;flex-direction:column;font-weight:600;font-size:17px;line-height:1.1}
@@ -128,6 +129,32 @@ body.intro .party .pc:not(.mus){display:none}
 
 <script>
 (()=>{
+/* ===== Voci: frasi dei personaggi e parole lette ad alta voce =====
+   Frasi: audio/voce/<prefisso><numero>.mp3 nell'ordine delle liste. Le prime frasi di ogni personaggio
+   vengono da Maci e Piumi; le altre si generano con ./genera-voci.sh (crea solo i file che mancano).
+   Parole (lettere, numeri, sillabe): audio/parole/<parola>.mp3 */
+const PREFIX={simone:'o',luisa:'l',emma:'e',giulio:'u',mile:'i'};
+const LINES={
+  simone:['CIAO MACI!','VAI DALLA ZIA SILVIA.','I MIEI ROBOTTINI SONO SCAPPATI!','MI AIUTI A PRENDERLI?','CORRI, MACI!','I MIEI ROBOTTINI!','GRAZIE MACI!','GUARDA IL COMPUTER!','CIAO PIUMI!','CORRI, PIUMI!','GRAZIE PIUMI!',
+    'SONO USCITI DAL COMPUTER.','OGNI ROBOTTINO HA UNA LETTERA.','PREMI LA STESSA LETTERA SULLA TASTIERA!','COSÌ IL ROBOTTINO TORNA A CASA.','BRAVO MACI!','BRAVA PIUMI!',
+    'ADESSO IL TASTO NON BRILLA SUBITO!','GUARDA! INSIEME FANNO UNA PAROLA!','IL COMPUTER HA DETTO MIAO!','PREMI INVIO PER ANDARE AVANTI.','CERCA IL TASTO CHE BRILLA!'],
+  luisa:['CIAO PIUMI!','NON TROVO I MIEI OCCHIALI.','MI AIUTI A CERCARLI?','CERCA BENE, PIUMI!','I MIEI OCCHIALI!','GRAZIE PIUMI! ORA CI VEDO.','VAI DAL NONNO GIAN.','GIOCA CON MARGHERITA!','VIENI AL TAVOLO!','ECCO TÈ E BISCOTTI!','BRAVA PIUMI!','TUTTI A MERENDA!',
+    'CIAO MACI!','CERCA BENE, MACI!','GRAZIE MACI! ORA CI VEDO.','BRAVO MACI!','GRAZIE PIUMI!','GRAZIE MACI!',
+    'SONO CADUTI TUTTI I MIEI LIBRI!','OGNI LIBRO HA UNA LETTERA.','PREMI LA LETTERA E IL LIBRO TORNA A POSTO.','ADESSO IL TASTO NON BRILLA SUBITO!','CERCA IL TASTO CHE BRILLA!','ADESSO SCRIVI NONNA!','TUTTI I LIBRI SONO A POSTO!'],
+  emma:['CIAO MACI!','CIAO PIUMI!','OGGI È LA FESTA DI MARGHERITA.','TROVA 3 MARGHERITE!','NON HAI ANCORA MARGHERITE.','HAI 1 MARGHERITA.','HAI 2 MARGHERITE.','NE MANCANO 3!','NE MANCANO 2!','NE MANCA 1!','BRAVO! CHE BELLE!','BRAVA! CHE BELLE!','SERVE UN NASTRO.','CERCA SOTTO IL VASO!','IL NASTRO È SOTTO UN VASO.','PROVA TUTTI I VASI!','CORRI!','PORTA I FIORI A MARGHERITA!','MIAO! CHE BELLA FESTA!',
+    'FACCIO UNA SCIARPA PER MARGHERITA.','OGNI GOMITOLO HA UNA SILLABA.','SCRIVI LA SILLABA CON DUE TASTI!','BRAVO MACI!','BRAVA PIUMI!','ADESSO IL TASTO NON BRILLA SUBITO!','CERCA IL TASTO CHE BRILLA!','ADESSO LE PAROLE!','LA SCIARPA È PRONTA!','GRAZIE MACI!','GRAZIE PIUMI!'],
+  giulio:['CIAO MACI!',"MI AIUTI NELL'ORTO?",'RACCOGLI 3 CAROTE!','CERCA LE FOGLIE GRANDI!','CHE BELLE CAROTE!','GRAZIE MACI!','VAI DALLA ZIA MILE.','TUTTI A TAVOLA!','CIAO PIUMI!','GRAZIE PIUMI!',
+    'RACCOGLIAMO LE CAROTE!','CONTA LE CAROTE.','PREMI IL NUMERO GIUSTO!','QUANTE CAROTE?','BRAVO MACI!','BRAVA PIUMI!','ADESSO IL TASTO NON BRILLA SUBITO!','CERCA IL TASTO CHE BRILLA!','ADESSO I POMODORI!','QUANTI POMODORI?','CHE BEL CESTO!'],
+  mile:['CIAO MACI!','VAI DALLO ZIO GIULIO.','LE GALLINE SONO SCAPPATE!','RIPORTALE NEL POLLAIO!','CORRI, MACI!','GRAZIE MACI!','PRENDI LE UOVA!','CHE BELLE UOVA!','FACCIAMO LA FRITTATA.','ECCO LA FRITTATA!','BRAVO MACI!','CIAO PIUMI!','CORRI, PIUMI!','GRAZIE PIUMI!','BRAVA PIUMI!',
+    'LE GALLINE FANNO LE UOVA.','CONTA TUTTE LE UOVA!','QUANTE UOVA IN TUTTO?','ADESSO IL TASTO NON BRILLA SUBITO!','CERCA IL TASTO CHE BRILLA!','ADESSO TANTE UOVA!']
+};
+/* le parole lette con la voce "maestra" (lettere, numeri, sillabe, parole delle immagini) */
+const NOME={A:'a',B:'bi',C:'ci',D:'di',E:'e',F:'effe',G:'gi',H:'acca',I:'i',J:'i lunga',K:'cappa',L:'elle',M:'emme',N:'enne',O:'o',P:'pi',Q:'cu',R:'erre',S:'esse',T:'ti',U:'u',V:'vu',W:'doppia vu',X:'ics',Y:'ipsilon',Z:'zeta',
+  '0':'zero','1':'uno','2':'due','3':'tre','4':'quattro','5':'cinque','6':'sei','7':'sette','8':'otto','9':'nove',SPAZIO:'spazio',INVIO:'invio',CANC:'cancella'};
+const FIGURE={M:'mela',P:'palla',L:'luna',T:'tazza',S:'sole',N:'nuvola',R:'rana',D:'dado'};
+const SILLABE=[...'MPLTNS'].flatMap(c=>[...'AEIOU'].map(v=>(c+v).toLowerCase()));
+const PAROLE=[...new Set([...Object.values(NOME),...Object.entries(FIGURE).map(([k,w])=>NOME[k]+' come '+w),...SILLABE,'mela','luna','sole','nonna','più','fa'])];
+
 /* ===== Motore: schermo, audio, voci, dialoghi, effetti, salvataggi ===== */
 const cv=document.getElementById('game'),ctx=cv.getContext('2d');
 const OL='#3b2a35',TAU=Math.PI*2;
@@ -178,16 +205,7 @@ function voiceScore(v){const n=v.name.toLowerCase();let s=0;
   if(/compact|espeak/.test(n))s-=40;if(v.localService===false)s+=5;return s;}
 function loadVoices(){try{voices=speechSynthesis.getVoices().filter(v=>/^it/i.test(v.lang)).sort((a,b)=>voiceScore(b)-voiceScore(a));}catch(e){voices=[];}chosen=voices[0]||null;}
 try{loadVoices();speechSynthesis.onvoiceschanged=loadVoices;}catch(e){}
-const VOX={emma:{pitch:.95,rate:.82},girl:{pitch:1.3,rate:.95},simone:{pitch:.9,rate:.92},lettere:{pitch:1.1,rate:.8},cat:{pitch:1.15,rate:.9}};
-/* Frasi registrate: audio/voce/<prefisso><numero>.mp3 nell'ordine della lista (le prime 11 di zio Simone vengono da Maci e Piumi) */
-const PREFIX={simone:'o'};
-const LINES={
-  simone:['CIAO MACI!','VAI DALLA ZIA SILVIA.','I MIEI ROBOTTINI SONO SCAPPATI!','MI AIUTI A PRENDERLI?','CORRI, MACI!','I MIEI ROBOTTINI!','GRAZIE MACI!','GUARDA IL COMPUTER!','CIAO PIUMI!','CORRI, PIUMI!','GRAZIE PIUMI!',
-    'SONO USCITI DAL COMPUTER.','OGNI ROBOTTINO HA UNA LETTERA.','PREMI LA STESSA LETTERA SULLA TASTIERA!','COSÌ IL ROBOTTINO TORNA A CASA.','BRAVO MACI!','BRAVA PIUMI!',
-    'ADESSO IL TASTO NON BRILLA SUBITO!','GUARDA! INSIEME FANNO UNA PAROLA!','IL COMPUTER HA DETTO MIAO!','PREMI INVIO PER ANDARE AVANTI.','CERCA IL TASTO CHE BRILLA!']
-};
-/* lettere e numeri registrati: audio/lettere/<tasto>.mp3 */
-const LETTER_CLIPS=new Set([...'AEIOUM']);
+const VOX={emma:{pitch:.95,rate:.82},luisa:{pitch:.95,rate:.85},giulio:{pitch:.8,rate:.9},mile:{pitch:1.05,rate:.9},girl:{pitch:1.3,rate:.95},simone:{pitch:.9,rate:.92},lettere:{pitch:1.1,rate:.8},cat:{pitch:1.15,rate:.9}};
 let clip=null,voice=true;
 function stopVoice(){try{speechSynthesis.cancel();}catch(e){}if(clip){clip.pause();clip=null;}}
 function playClip(src,fallback){clip=new Audio(src);clip.play().catch(fallback);clip.onerror=fallback;}
@@ -195,19 +213,28 @@ function say(t,who){if(!voice)return;stopVoice();
   const k=(LINES[who]||[]).indexOf(t);
   if(k>=0){playClip('audio/voce/'+PREFIX[who]+String(k+1).padStart(2,'0')+'.mp3',()=>ttsSay(t,who));return;}
   ttsSay(t,who);}
-function sayKey(id){if(!voice||!NOME[id])return;stopVoice();
-  if(LETTER_CLIPS.has(id))playClip('audio/lettere/'+id+'.mp3',()=>ttsSay(NOME[id],'lettere'));
-  else ttsSay(NOME[id],'lettere');}
+/* parole, lettere e numeri con la voce "maestra" */
+const PAROLE_SET=new Set(PAROLE);
+const slug=t=>t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+function sayWord(t){if(!voice||!t)return;stopVoice();
+  if(PAROLE_SET.has(t))playClip('audio/parole/'+slug(t)+'.mp3',()=>ttsSay(t,'lettere'));else ttsSay(t,'lettere');}
+const sayKey=id=>sayWord(NOME[id]);
+/* più parole una dopo l'altra (per contare: uno, due, tre...) */
+let sayTimers=[];
+function sayList(list,gap){sayTimers.forEach(clearTimeout);sayTimers=list.map((t,i)=>setTimeout(()=>sayWord(t),i*(gap||650)));}
 function ttsSay(t,who){try{speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(t.toLowerCase().replace(/!/g,'! ').replace(/\./g,'. '));u.lang='it-IT';if(chosen)u.voice=chosen;
   const p=VOX[who]||VOX.cat;u.pitch=p.pitch;u.rate=p.rate;speechSynthesis.speak(u);}catch(e){}}
 
 /* ---------- dialoghi (OK si preme anche con INVIO) ---------- */
-const NAMES={emma:'EMMA',girl:'MARGHERITA',simone:'ZIO SIMONE'};
+const NAMES={emma:'EMMA',girl:'MARGHERITA',simone:'ZIO SIMONE',luisa:'NONNA LUISA',giulio:'ZIO GIULIO',mile:'ZIA MILE'};
 const PORTRAIT={
   emma:p=>{p.setTransform(2.6,0,0,2.6,0,0);drawCat(p,30,74,CATS.emma,{sit:true,f:1,t:0,noShadow:true});},
   girl:p=>{p.setTransform(2.4,0,0,2.4,0,0);drawGirl(p,38,148,{t:0,noShadow:true});},
-  simone:p=>{p.setTransform(2.2,0,0,2.2,0,0);drawPerson(p,42,145,{kind:'simone',noShadow:true});}
+  simone:p=>{p.setTransform(2.2,0,0,2.2,0,0);drawPerson(p,42,145,{kind:'simone',noShadow:true});},
+  luisa:p=>{p.setTransform(2.2,0,0,2.2,0,0);drawPerson(p,42,150,{kind:'luisa',glasses:true,noShadow:true});},
+  giulio:p=>{p.setTransform(2.2,0,0,2.2,0,0);drawPerson(p,42,145,{kind:'giulio',noShadow:true});},
+  mile:p=>{p.setTransform(2.2,0,0,2.2,0,0);drawPerson(p,42,150,{kind:'mile',noShadow:true});}
 };
 let dlg=null;
 function openDialog(who,pages,done){
@@ -518,6 +545,44 @@ function robot(c,m){
   c.restore();
 }
 
+/* da mp/src/livello4.js: carote, pomodori, galline */
+function carrotTop(c,x,y,big){
+  const s=big?1.5:1;
+  c.strokeStyle=OL;c.lineWidth=big?6:5;
+  [[-8,-18],[0,-22],[8,-18]].forEach(([a,b])=>{c.beginPath();c.moveTo(x,y-2);c.lineTo(x+a*s,y+b*s);c.stroke();});
+  c.strokeStyle=big?'#4fc25a':'#3f9a48';c.lineWidth=big?3:2.4;
+  [[-8,-18],[0,-22],[8,-18]].forEach(([a,b])=>{c.beginPath();c.moveTo(x,y-2);c.lineTo(x+a*s,y+b*s);c.stroke();});
+  E(c,x,y,big?7:5,big?4:3);fs(c,'#ff8a2a',1.8);
+}
+function tomato(c,x,y){rr(c,x-2,y-48,4,48,2);c.fillStyle='#b0743f';c.fill();
+  [[-7,-16],[7,-30],[-6,-40]].forEach(([a,b])=>{E(c,x+a*1.4,y+b+2,8,4,a>0?.4:-.4);c.fillStyle='#3f9a48';c.fill();});
+  [[-6,-22],[6,-14],[5,-38]].forEach(([a,b])=>{C(c,x+a,y+b,5);fs(c,'#e5533d',1.6);});}
+function carrot(c,x,y,rot){
+  c.save();c.translate(x,y);c.rotate(rot||0);
+  c.beginPath();c.moveTo(-5,-2);c.lineTo(0,20);c.lineTo(5,-2);c.closePath();fs(c,'#ff8a2a',2);
+  c.strokeStyle='#3f9a48';c.lineWidth=2.5;[[-4,-10],[0,-12],[4,-10]].forEach(([a,b])=>{c.beginPath();c.moveTo(0,-2);c.lineTo(a,b);c.stroke();});
+  c.restore();}
+function drawCarrots(c,x,y){[-.35,0,.35].forEach((r,i)=>carrot(c,x+(i-1)*7,y,r));}
+function hen(c,x,y,f,col,o){
+  c.save();c.translate(x,y);c.scale(f*(o.s||1),o.s||1);
+  const t=o.t||0,run=o.run,peck=!run&&!RM&&o.peck&&Math.sin(t*3+o.k)>.6;
+  const bob=RM?0:run?Math.abs(Math.sin(t*16))*3:0;
+  if(!o.noShadow)shadowAt(c,0,0,16,5);
+  const lp=run&&!RM?Math.sin(t*16)*5:0;
+  c.strokeStyle='#e8a33a';c.lineWidth=2.4;[[-4,lp],[4,-lp]].forEach(([a,d])=>{c.beginPath();c.moveTo(a,-10-bob);c.lineTo(a+d,0);c.stroke();});
+  c.translate(0,-bob);
+  c.beginPath();c.moveTo(-12,-18);c.lineTo(-22,-34);c.lineTo(-16,-36);c.lineTo(-18,-28);c.closePath();fs(c,o.rooster?'#2f7d4a':col[1],2);
+  E(c,0,-20,16,12);fs(c,col[0],2.5);
+  E(c,-3,-20,8,6,-.3);c.fillStyle=col[1];c.fill();
+  const hx=peck?16:11,hy=peck?-14:-34;
+  c.beginPath();c.moveTo(hx-3,hy-8);c.lineTo(hx-1,hy-14);c.lineTo(hx+2,hy-9);c.lineTo(hx+5,hy-14);c.lineTo(hx+6,hy-6);c.closePath();fs(c,'#e5533d',1.6);
+  C(c,hx,hy,8);fs(c,col[0],2.2);
+  c.beginPath();c.moveTo(hx+7,hy-2);c.lineTo(hx+13,hy);c.lineTo(hx+7,hy+3);c.closePath();fs(c,'#ffc93d',1.4);
+  E(c,hx+5,hy+6,2.5,3.5);c.fillStyle='#e5533d';c.fill();
+  C(c,hx+2,hy-1,1.8);c.fillStyle=OL;c.fill();
+  c.restore();
+}
+
 /* ===== Tastiera italiana disegnata: tasti colorati per dito, zampette su F e J ===== */
 const KU=57,KG=4;   /* lato di un tasto e spazio fra i tasti (unità logiche) */
 const KB={x:(LW-14.7*KU)/2,y:440};
@@ -535,10 +600,6 @@ addKey('CANC',12,0,2.7,1);
 addKey('INVIO',12.8,1,1.9,2);
 addKey('SPAZIO',3.6,4,6.2,1);
 const LABEL={CANC:'⌫ CANCELLA',INVIO:'INVIO ⏎',SPAZIO:''};
-
-/* nome di ogni lettera, come si dice a voce */
-const NOME={A:'a',B:'bi',C:'ci',D:'di',E:'e',F:'effe',G:'gi',H:'acca',I:'i',J:'i lunga',K:'cappa',L:'elle',M:'emme',N:'enne',O:'o',P:'pi',Q:'cu',R:'erre',S:'esse',T:'ti',U:'u',V:'vu',W:'doppia vu',X:'ics',Y:'ipsilon',Z:'zeta',
-  '0':'zero','1':'uno','2':'due','3':'tre','4':'quattro','5':'cinque','6':'sei','7':'sette','8':'otto','9':'nove',SPAZIO:'spazio',INVIO:'invio',CANC:'cancella'};
 
 /* dal tasto premuto sulla tastiera vera al nome del tasto disegnato */
 function keyId(e){
@@ -576,6 +637,105 @@ function drawKeyboard(c,o){
     if(k.id=='SPAZIO'){zampetta(c,x+k.w/2-24,y+k.h/2,8,'rgba(59,42,53,.35)');zampetta(c,x+k.w/2+24,y+k.h/2,8,'rgba(59,42,53,.35)');}
   });
 }
+
+/* ===== Figure: le immagini delle parole, gomitoli, uova, cesti ===== */
+const ICON={
+  mela(c){c.beginPath();c.moveTo(0,-22);c.bezierCurveTo(-30,-40,-46,0,-22,30);c.quadraticCurveTo(0,42,22,30);c.bezierCurveTo(46,0,30,-40,0,-22);fs(c,'#e5533d');
+    E(c,-12,-8,6,10,-.5);c.fillStyle='rgba(255,255,255,.5)';c.fill();
+    c.beginPath();c.moveTo(0,-22);c.lineTo(3,-36);c.strokeStyle=OL;c.lineWidth=4;c.stroke();E(c,14,-34,11,5,-.4);fs(c,'#5cbf60',2.5);},
+  palla(c){C(c,0,0,34);fs(c,'#fff');c.save();C(c,0,0,34);c.clip();
+    ['#e5533d','#ffc93d','#6ab8ff'].forEach((col,i)=>{c.save();c.rotate(i*TAU/3);c.beginPath();c.moveTo(0,0);c.arc(0,0,40,-.5,.5);c.closePath();c.fillStyle=col;c.fill();c.restore();});
+    c.restore();C(c,0,0,34);c.lineWidth=3;c.strokeStyle=OL;c.stroke();C(c,0,0,6);fs(c,'#fff',2);},
+  luna(c){const r1=34,r2=28,dx=14,dy=-10,d=Math.hypot(dx,dy),q=(r1*r1-r2*r2+d*d)/(2*d),th=Math.atan2(dy,dx),al=Math.acos(q/r1);
+    const pa=th+al,pb=th-al,ang=p=>Math.atan2(r1*Math.sin(p)-dy,r1*Math.cos(p)-dx);
+    c.beginPath();c.arc(0,0,r1,pa,pb+TAU);c.arc(dx,dy,r2,ang(pb),ang(pa),true);c.closePath();fs(c,'#ffd23d');
+    C(c,-16,0,3);c.fillStyle=OL;c.fill();c.beginPath();c.arc(-12,12,6,.4,1.8);c.lineWidth=2.5;c.strokeStyle=OL;c.stroke();},
+  tazza(c){rr(c,-26,-24,44,48,8);fs(c,'#6ab8ff');c.beginPath();c.arc(20,0,12,-1.3,1.3);c.lineWidth=6;c.strokeStyle=OL;c.stroke();c.lineWidth=3;c.strokeStyle='#6ab8ff';c.stroke();
+    E(c,-4,-24,22,5);fs(c,'#8a5a36',2.5);[-12,0].forEach(d=>{c.beginPath();c.moveTo(d,-34);c.quadraticCurveTo(d+6,-40,d,-48);c.strokeStyle='rgba(59,42,53,.4)';c.lineWidth=2.5;c.stroke();});},
+  sole(c){for(let i=0;i<10;i++){c.save();c.rotate(i*TAU/10+(RM?0:T*.5));c.beginPath();c.moveTo(-5,-26);c.lineTo(0,-40);c.lineTo(5,-26);c.closePath();fs(c,'#ffb02e',2);c.restore();}
+    C(c,0,0,26);fs(c,'#ffd23d');C(c,-8,-4,3);C(c,8,-4,3);c.fillStyle=OL;c.fill();c.beginPath();c.arc(0,4,10,.3,Math.PI-.3);c.lineWidth=3;c.stroke();},
+  nuvola(c){c.beginPath();c.arc(-18,6,16,Math.PI*.5,Math.PI*1.5);c.arc(-4,-10,18,Math.PI,Math.PI*1.9);c.arc(18,-2,16,Math.PI*1.3,Math.PI*.4);c.lineTo(-18,22);c.closePath();fs(c,'#fff');
+    C(c,-8,2,2.5);C(c,8,2,2.5);c.fillStyle=OL;c.fill();},
+  rana(c){E(c,0,8,34,24);fs(c,'#5cbf60');[-16,16].forEach(d=>{C(c,d,-14,11);fs(c,'#5cbf60');C(c,d,-14,6);fs(c,'#fff',2);C(c,d+1,-13,3);c.fillStyle=OL;c.fill();});
+    c.beginPath();c.arc(0,8,16,.3,Math.PI-.3);c.strokeStyle=OL;c.lineWidth=3;c.stroke();E(c,-20,14,4,3);E(c,20,14,4,3);c.fillStyle='rgba(255,110,140,.5)';c.fill();},
+  dado(c){c.save();c.rotate(-.15);rr(c,-30,-30,60,60,12);fs(c,'#fff');[[-14,-14],[14,-14],[0,0],[-14,14],[14,14]].forEach(([a,b])=>{C(c,a,b,5.5);c.fillStyle='#e5533d';c.fill();});c.restore();}
+};
+function drawIcon(c,name,x,y,s){if(!ICON[name])return;c.save();c.translate(x,y);c.scale(s||1,s||1);c.lineJoin='round';c.lineCap='round';ICON[name](c);c.restore();}
+
+/* gomitolo di lana con i fili */
+function gomitolo(c,x,y,r,col,rot){c.save();c.translate(x,y);c.rotate(rot||0);C(c,0,0,r);fs(c,col,3);
+  c.save();C(c,0,0,r);c.clip();c.strokeStyle='rgba(255,255,255,.45)';c.lineWidth=r*.09;
+  for(let i=-3;i<=3;i++){c.beginPath();c.ellipse(i*r*.22,0,r*.35,r*1.1,.5,0,TAU);c.stroke();}
+  c.strokeStyle='rgba(59,42,53,.25)';for(let i=-2;i<=2;i++){c.beginPath();c.ellipse(0,i*r*.3,r*1.1,r*.3,-.3,0,TAU);c.stroke();}
+  c.restore();c.restore();}
+function uovo(c,x,y,s,glow){c.save();c.translate(x,y);c.scale(s||1,s||1);
+  if(glow){c.save();c.shadowColor='#ffd23d';c.shadowBlur=18;E(c,0,0,13,16);c.fillStyle='#ffe98a';c.fill();c.restore();}
+  E(c,0,0,12,15);fs(c,glow?'#fff4c2':'#fff8ec',2.4);E(c,-4,-6,3,4,-.4);c.fillStyle='rgba(255,255,255,.9)';c.fill();c.restore();}
+function cesto(c,x,y,w,front){
+  const h=w*.45;
+  if(!front){c.beginPath();c.arc(x,y-h*.2,w*.5,Math.PI,0);c.strokeStyle=OL;c.lineWidth=7;c.stroke();c.strokeStyle='#c98b55';c.lineWidth=4;c.stroke();E(c,x,y-h*.2,w*.5,h*.22);c.fillStyle='#7a4e2c';c.fill();return;}
+  c.beginPath();c.moveTo(x-w*.5,y-h*.2);c.lineTo(x-w*.4,y+h*.6);c.lineTo(x+w*.4,y+h*.6);c.lineTo(x+w*.5,y-h*.2);c.closePath();fs(c,'#c98b55');
+  c.strokeStyle='#a86d3c';c.lineWidth=2.5;for(let i=1;i<4;i++){const yy=y-h*.2+i*h*.2;c.beginPath();c.moveTo(x-w*.48+i*2,yy);c.lineTo(x+w*.48-i*2,yy);c.stroke();}
+  E(c,x,y-h*.2,w*.5,h*.22);c.lineWidth=3;c.strokeStyle=OL;c.stroke();}
+
+/* ===== Il giro comune delle missioni 2–5 =====
+   Una missione ha tre turni; ogni turno è una serie di prove; ogni prova chiede una sequenza di tasti
+   (una lettera "M", una sillaba "MA", una parola "NONNA", un numero "5").
+   La missione disegna la scena e decide cosa succede; qui si contano errori, aiuti, zampe e stelle. */
+const HINT_DELAY=[0,2.5,5];   /* dopo quanti secondi brilla il tasto: zampa piccola, media, grande */
+function makeQuiz(o){
+  /* o: {index,who,name,sub,music,intro(),rounds:[()=>prove],between(r)→frasi,ending()→frasi,endText,
+         quest(r),icon(on),show(p)→secondi,prompt(p),step(p,i),good(p)→secondi,bad(p,id),help(p),update(dt),draw(c)} */
+  const Q={timers:[]};
+  const after=(sec,fn)=>Q.timers.push({t:sec,fn});
+  const cur=()=>Q.prove&&Q.prove[Q.pi];
+  function hud(){setQuest(o.quest(Q.round),ZAMPE[Q.zampa]);setProg(Q.prove?Q.prove.map((p,i)=>o.icon(i<Q.pi||(i==Q.pi&&p.done))).join(''):'');}
+  function startRound(r){Q.round=r;Q.rErr=0;Q.prove=o.rounds[r]();Q.pi=0;hud();showProva();}
+  function showProva(){const p=cur();p.pos=0;p.err=0;p.done=false;Q.wt=0;Q.busy=true;
+    after(o.show(p)||.8,()=>{Q.busy=false;Q.wt=0;o.prompt(p);});}
+  function key(id){
+    const p=cur();if(!p||Q.busy)return;
+    const want=p.keys[p.pos];
+    if(id==want){segna(want,true);p.pos++;sfx.ok();
+      if(p.pos<p.keys.length){Q.wt=0;o.step(p,p.pos,id);return;}
+      p.done=true;Q.busy=true;hud();const d=o.good(p);
+      after(d==null?1:d,()=>{Q.pi++;if(Q.pi<Q.prove.length)showProva();else{Q.prove=null;hud();after(.4,endRound);}});
+    }else{
+      if(KEYS[id])KEYS[id].shake=1;sfx.boop();p.err++;Q.rErr++;Q.err++;segna(want,false);
+      o.bad(p,id);
+      if(p.err==2){floatText(QCAT.x+10,QCAT.y-110,'MIAO?','#fff',30);after(.4,()=>o.help(p));}
+    }
+  }
+  function endRound(){
+    const r=Q.round,pages=[`${BRAV()} ${N()}!`];
+    if(r<o.rounds.length-1){
+      if(Q.rErr<=1&&Q.zampa<2){Q.zampa++;pages.push('ADESSO IL TASTO NON BRILLA SUBITO!');}
+      else if(Q.rErr>=5&&Q.zampa>0){Q.zampa--;pages.push('CERCA IL TASTO CHE BRILLA!');}
+      openDialog(o.who,pages.concat(o.between(r)),()=>startRound(r+1));
+    }else{
+      openDialog(o.who,o.ending(),()=>{
+        sfx.win();confetti(500,200);
+        const stelle=Q.err<=2?3:Q.err<=6?2:1;
+        SAVE.stelle[o.index]=Math.max(SAVE.stelle[o.index]||0,stelle);SAVE.zampa[o.index]=Q.zampa;save();
+        after(1.4,()=>showEnd(stelle,o.endText));
+      });
+    }
+  }
+  const mission={name:o.name,sub:o.sub,who:o.who,ready:true,music:o.music,index:o.index,
+    start(){Q.timers=[];Q.zampa=SAVE.zampa[o.index]||0;Q.err=0;Q.rErr=0;Q.prove=null;Q.round=0;Q.wt=0;Q.busy=true;
+      o.reset&&o.reset();hud();setProg('');openDialog(o.who,o.intro(),()=>startRound(0));},
+    update(dt){Q.wt+=dt;const ts=Q.timers;Q.timers=[];ts.forEach(t=>{t.t-=dt;if(t.t<=0)t.fn();else Q.timers.push(t);});o.update(dt);},
+    draw:c=>o.draw(c),key,
+    kbOpts(){const p=cur();if(!p||Q.busy||p.done)return {};
+      const glow=p.err>0?1:Math.max(0,Math.min(1,(Q.wt-HINT_DELAY[Q.zampa])/.4));return {target:p.keys[p.pos],glow};}
+  };
+  Q.after=after;Q.cur=cur;o.Q=Q;
+  return mission;
+}
+/* dove sta il gatto nelle scene delle missioni (per il "MIAO?" dopo due errori) */
+const QCAT={x:150,y:400};
+function drawQCat(c,hop){drawCat(c,QCAT.x,QCAT.y-Math.sin(hop*Math.PI)*28,CATS[SAVE.cur],{sit:hop<.05,f:1,t:T,scale:1.7,moving:hop>0});}
+const BRAVI=()=>['SÌ!','EVVIVA!','BRAVISSIM'+(SAVE.cur=='piumi'?'A!':'O!')][Math.floor(Math.random()*3)];
 
 /* ===== Schermata iniziale: Maci e Piumi camminano sulla tastiera e scrivono TIC TAC MIAO ===== */
 const TITLE=[...'TIC','SPAZIO',...'TAC','SPAZIO',...'MIAO'];
@@ -620,7 +780,8 @@ const SIMP={x:880,y:425,s:1.6};
 const ROBOT_COL=['#cfd3e0','#8fc8ff','#ffd36a','#a8e08f','#f9b4c8'];
 const HINT=[0,2.5,5];              /* dopo quanti secondi brilla il tasto, per ogni zampa */
 const robotSVG=on=>`<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 6V3" stroke="#3b2a35" stroke-width="1.6"/><circle cx="13" cy="2.6" r="2" fill="${on?'#e5533d':'#cbbf9f'}"/><rect x="7" y="6" width="12" height="8" rx="2.5" fill="${on?'#8fc8ff':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.5"/><circle cx="11" cy="10" r="1.2" fill="${on?'#2b2a33':'#cbbf9f'}"/><circle cx="15" cy="10" r="1.2" fill="${on?'#2b2a33':'#cbbf9f'}"/><rect x="6" y="14.5" width="14" height="8" rx="2.5" fill="${on?'#8fc8ff':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.5"/><circle cx="9" cy="24" r="1.8" fill="#3b2a35"/><circle cx="17" cy="24" r="1.8" fill="#3b2a35"/></svg>`;
-let S;
+let S,timers=[];
+const after=(sec,fn)=>timers.push({t:sec,fn});
 
 /* tre ondate: le vocali, ancora le vocali mescolate, poi quattro robottini che scrivono MIAO */
 function vocali6(){const v=[...'AEIOU'],out=[];while(out.length<6){const k=v[Math.floor(Math.random()*5)];if(k!=out[out.length-1])out.push(k);}return out;}
@@ -651,7 +812,7 @@ function key(id){
     hud();
   }else{
     if(KEYS[id])KEYS[id].shake=1;sfx.boop();m.err++;m.no=1;S.rErr++;S.err++;segna(m.l,false);
-    if(m.err==2){floatText(CATP.x+10,CATP.y-110,'MIAO?','#fff',30);setTimeout(()=>{if(m.phase=='wait')sayKey(m.l);},350);}
+    if(m.err==2){floatText(CATP.x+10,CATP.y-110,'MIAO?','#fff',30);after(.35,()=>{if(m.phase=='wait')sayKey(m.l);});}
   }
 }
 
@@ -666,17 +827,18 @@ function endRound(){
     if(S.rErr>=5&&S.zampa>0)S.zampa--;
     openDialog('simone',[b,'GUARDA! INSIEME FANNO UNA PAROLA!'],()=>startRound(2));
   }else{
-    S.flash={txt:'MIAO!',t:3};sfx.meow();setTimeout(sfx.meow,300);floatText(CATP.x+10,CATP.y-120,'MIAO!','#ffd23d',40);
-    setTimeout(()=>openDialog('simone',['IL COMPUTER HA DETTO MIAO!','I MIEI ROBOTTINI!',`GRAZIE ${N()}!`],()=>{
+    S.flash={txt:'MIAO!',t:3};sfx.meow();after(.3,sfx.meow);floatText(CATP.x+10,CATP.y-120,'MIAO!','#ffd23d',40);
+    after(1.3,()=>openDialog('simone',['IL COMPUTER HA DETTO MIAO!','I MIEI ROBOTTINI!',`GRAZIE ${N()}!`],()=>{
       sfx.win();confetti(500,200);S.finished=true;
       const stelle=S.err<=2?3:S.err<=6?2:1;
       SAVE.stelle[0]=Math.max(SAVE.stelle[0]||0,stelle);SAVE.zampa[0]=S.zampa;save();
-      setTimeout(()=>showEnd(stelle,'I robottini sono tornati nel computer di zio Simone!'),1600);
-    }),1300);
+      after(1.6,()=>showEnd(stelle,'I robottini sono tornati nel computer di zio Simone!'));
+    }));
   }
 }
 
 function update(dt){
+  const ts=timers;timers=[];ts.forEach(t=>{t.t-=dt;if(t.t<=0)t.fn();else timers.push(t);});
   S.hop=Math.max(0,S.hop-dt*3);S.wave=Math.max(0,S.wave-dt);
   if(S.flash){S.flash.t-=dt;if(S.flash.t<=0)S.flash=null;}
   if(!S.queue)return;
@@ -684,14 +846,14 @@ function update(dt){
     m.no=Math.max(0,m.no-dt*2);
     if(m.phase=='out'){m.t+=dt/.9;if(m.t<0)return;const t=Math.min(1,m.t),e=1-Math.pow(1-t,3);
       m.x=HOME.x+(m.tx-HOME.x)*e;m.y=HOME.y+(m.ty-HOME.y)*e-Math.sin(t*Math.PI)*90;m.s=.2+(m.ts-.2)*e;
-      if(t>=1){m.phase='wait';m.wt=0;if(m===current()||S.word==null)setTimeout(()=>{if(m.phase=='wait'&&m===current())sayKey(m.l);},250);}}
+      if(t>=1){m.phase='wait';m.wt=0;if(m===current()||S.word==null)after(.25,()=>{if(m.phase=='wait'&&m===current())sayKey(m.l);});}}
     else if(m.phase=='wait')m.wt+=dt;
     else if(m.phase=='home'){m.t+=dt/.7;const t=Math.min(1,m.t),e=t*t;
       m.x=m.fx+(HOME.x-m.fx)*e;m.y=m.fy+(HOME.y-m.fy)*e-Math.sin(t*Math.PI)*110;m.s=m.fs+(.15-m.fs)*e;
       if(t>=1){m.phase='gone';S.doneN++;burst(HOME.x,HOME.y,14,['#5cff7a','#6ab8ff','#ffc93d']);
-        if(S.doneN>=S.total){S.queue=null;setProg('');setTimeout(endRound,500);}
-        else if(S.word==null)setTimeout(nextRobot,300);
-        else{const n=current();if(n&&n.phase=='wait')setTimeout(()=>{if(n.phase=='wait'&&n===current())sayKey(n.l);},200);}}}
+        if(S.doneN>=S.total){S.queue=null;setProg('');after(.5,endRound);}
+        else if(S.word==null)after(.3,nextRobot);
+        else{const n=current();if(n&&n.phase=='wait')after(.2,()=>{if(n.phase=='wait'&&n===current())sayKey(n.l);});}}}
   });
 }
 
@@ -758,9 +920,9 @@ function kbOpts(){
 }
 
 MISSIONS.push({
-  name:'Il computer di zio Simone',sub:'A E I O U',who:'simone',ready:true,music:'audio/computer.mp3',
+  name:'Il computer di zio Simone',sub:'A E I O U',who:'simone',ready:true,music:'audio/m1.mp3',
   start(){
-    S={zampa:SAVE.zampa[0]||0,err:0,rErr:0,hop:0,wave:0,flash:null,queue:null,word:null,round:-1,finished:false};
+    timers=[];S={zampa:SAVE.zampa[0]||0,err:0,rErr:0,hop:0,wave:0,flash:null,queue:null,word:null,round:-1,finished:false};
     hud();setProg('');
     openDialog('simone',[`CIAO ${N()}!`,'I MIEI ROBOTTINI SONO SCAPPATI!','SONO USCITI DAL COMPUTER.','OGNI ROBOTTINO HA UNA LETTERA.','PREMI LA STESSA LETTERA SULLA TASTIERA!','COSÌ IL ROBOTTINO TORNA A CASA.'],()=>startRound(0));
   },
@@ -768,11 +930,334 @@ MISSIONS.push({
 });
 })();
 
-/* ===== Avvio: schermate, tastiera vera e toccata, ciclo del gioco ===== */
-/* le missioni che arriveranno */
-[['I libri di nonna Luisa','LE LETTERE'],['I gomitoli di Emma','LE SILLABE'],["L'orto di zio Giulio",'CONTARE'],['Il pollaio di zia Mile','PIÙ'],
- ['I mirtilli di nonna Lucy','MENO'],['Le bolle di papà','LE PAROLE'],['La festa di Margherita e Rebecca','IL DETTATO']].forEach(([name,sub])=>MISSIONS.push({name,sub,ready:false}));
+/* ===== Missione 2: i libri di nonna Luisa (le consonanti: M come MELA) ===== */
+(()=>{
+const SHELF={x:330,y:26,w:340,h:292};
+const BOOK={x:500,y:212};          /* il libro aperto davanti alla libreria */
+const LUISA={x:880,y:420,s:1.5};
+const COLS=['#e5533d','#4f8fd8','#5cbf60','#ffc93d','#b46ee0','#ff9a3d','#2f6f8f','#f28cb0'];
+const bookSVG=on=>`<svg viewBox="0 0 26 26" aria-hidden="true"><rect x="5" y="4" width="16" height="19" rx="2" fill="${on?'#4f8fd8':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.6"/><path d="M8 4v19" stroke="#3b2a35" stroke-width="1.4"/><path d="M11 9h7M11 13h7" stroke="${on?'#fff':'#cbbf9f'}" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+let S={};
 
+function rounds(){
+  const a=shuffle([...'MPLT']),b=shuffle([...shuffle([...'SNRD']),...a.slice(0,2)]);
+  return [()=>a.map(l=>({keys:l,col:COLS[Math.floor(Math.random()*COLS.length)]})),
+          ()=>b.map(l=>({keys:l,col:COLS[Math.floor(Math.random()*COLS.length)]})),
+          ()=>[{keys:'NONNA',col:'#e5533d',word:true}]];
+}
+const R3=rounds();
+const o={
+  index:1,who:'luisa',name:'I libri di nonna Luisa',sub:'LE LETTERE',music:'audio/m2.mp3',
+  rounds:[()=>R3[0](),()=>R3[1](),()=>R3[2]()],
+  reset(){const r=rounds();R3.splice(0,3,...r);S={book:null,shelf:[],hop:0,wave:0};},
+  intro:()=>[`CIAO ${N()}!`,'SONO CADUTI TUTTI I MIEI LIBRI!','OGNI LIBRO HA UNA LETTERA.','PREMI LA LETTERA E IL LIBRO TORNA A POSTO.'],
+  between:r=>r==1?['ADESSO SCRIVI NONNA!']:[],
+  ending:()=>['TUTTI I LIBRI SONO A POSTO!',`GRAZIE ${N()}!`],
+  endText:'I libri di nonna Luisa sono tutti a posto!',
+  quest:r=>r==2?'SCRIVI LA PAROLA NONNA':'PREMI LA LETTERA DEL LIBRO',
+  icon:bookSVG,
+  show(p){S.book={p,t:0,phase:'in',no:0};return .8;},
+  prompt(p){p.word?sayWord('nonna'):sayWord(NOME[p.keys]+' come '+FIGURE[p.keys]);},
+  step(p,i,id){sayKey(id);const kc=keyCenter(id);burst(kc.x,kc.y,10,['#ffd23d','#fff']);},
+  good(p){const b=S.book;b.phase='out';b.t=0;S.hop=1;S.wave=1.2;
+    const kc=keyCenter(p.keys[p.keys.length-1]);burst(kc.x,kc.y,16,['#ffd23d','#fff',p.col]);
+    if(p.word){sayWord('nonna');confetti(BOOK.x,BOOK.y);floatText(BOOK.x,BOOK.y-120,'NONNA!','#ffd23d',46);return 1.8;}
+    sayWord(NOME[p.keys]+' come '+FIGURE[p.keys]);
+    if(p.err==0&&Math.random()<.4)floatText(BOOK.x,BOOK.y-110,['SÌ!','EVVIVA!','BRAVISSIM'+(SAVE.cur=='piumi'?'A!':'O!')][Math.floor(Math.random()*3)],'#ffd23d');
+    return 1.1;},
+  bad(){if(S.book)S.book.no=1;},
+  help(p){o.prompt(p);},
+  update(dt){S.hop=Math.max(0,S.hop-dt*3);S.wave=Math.max(0,S.wave-dt);
+    const b=S.book;if(!b)return;b.t+=dt;b.no=Math.max(0,b.no-dt*2);
+    if(b.phase=='out'&&b.t>=.8){S.shelf.push({col:b.p.col,l:b.p.word?'♥':b.p.keys});S.book=null;sfx.tic();}},
+  draw(c){
+    /* il salotto dei nonni */
+    c.fillStyle='#f6e3c8';c.fillRect(-EX,-EY,LW+2*EX,330+EY);
+    c.fillStyle='#efd3ae';for(let y=20;y<330;y+=46)for(let x=-Math.ceil(EX/46)*46+(y/46%2)*23;x<LW+EX;x+=46){C(c,x,y,4);c.fill();}
+    c.fillStyle='#c99a6b';c.fillRect(-EX,330,LW+2*EX,90);c.strokeStyle='#b88a5c';c.lineWidth=2;for(let x=-EX;x<LW+EX;x+=70){c.beginPath();c.moveTo(x,330);c.lineTo(x-30,420);c.stroke();}
+    c.strokeStyle=OL;c.lineWidth=3;c.beginPath();c.moveTo(-EX,330);c.lineTo(LW+EX,330);c.stroke();
+    /* tappeto */
+    E(c,520,385,230,26);fs(c,'#d9534f');E(c,520,385,190,18);c.fillStyle='#f28c6a';c.fill();
+    drawShelf(c);
+    c.save();c.translate(LUISA.x,LUISA.y);c.scale(LUISA.s,LUISA.s);drawPerson(c,0,0,{kind:'luisa',glasses:true,t:T,wave:S.wave>0});c.restore();
+    drawQCat(c,S.hop);
+    if(S.book)drawBook(c,S.book);
+  }
+};
+function drawShelf(c){
+  const {x,y,w,h}=SHELF;shadowAt(c,x+w/2,y+h+4,w/2,10);
+  rr(c,x,y,w,h,6);fs(c,'#9a6239');rr(c,x+10,y+12,w-20,h-24,3);c.fillStyle='#6f4127';c.fill();
+  const rh=(h-24)/3;
+  for(let r=0;r<3;r++){const by=y+12+(r+1)*rh;
+    if(r!=1){let bx=x+16,k=r*5;while(bx<x+w-34){const bw=14+(k*37)%10,bh=50+(k*53)%22;rr(c,bx,by-bh-3,bw,bh,2);fs(c,COLS[k%COLS.length],1.8);
+      c.beginPath();c.moveTo(bx+3,by-bh+6);c.lineTo(bx+bw-3,by-bh+6);c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=2;c.stroke();bx+=bw+2;k++;}}
+    else{/* qui tornano i libri caduti, con la loro lettera sul dorso */
+      S.shelf.forEach((b,i)=>{const bx=x+18+i*27,bh=66;rr(c,bx,by-bh-3,25,bh,3);fs(c,b.col,2);
+        bigText(c,b.l,bx+12.5,by-bh/2-3,18,'#fff');});}
+    rr(c,x+8,by-3,w-16,8,2);fs(c,'#b0743f',2);}
+  rr(c,x-6,y-6,w+12,14,4);fs(c,'#b0743f');
+}
+function drawBook(c,b){
+  const p=b.p;let x=BOOK.x,y=BOOK.y,s=1,sx=1;
+  if(b.phase=='in'){const t=Math.min(1,b.t/.7),e=1-Math.pow(1-t,3);y=400+(BOOK.y-400)*e;s=.3+.7*e;}
+  else{const t=Math.min(1,b.t/.8),slot={x:SHELF.x+18+S.shelf.length*27+12,y:SHELF.y+12+2*(SHELF.h-24)/3-36};
+    sx=Math.max(.08,1-t*3);x=BOOK.x+(slot.x-BOOK.x)*t*t;y=BOOK.y+(slot.y-BOOK.y)*t*t-Math.sin(t*Math.PI)*60;s=1-.65*t;}
+  const sw=b.no&&!RM?Math.sin(b.no*30)*.08*b.no:0;
+  c.save();c.translate(x,y);c.rotate(sw);c.scale(s*sx,s);
+  const W=p.word?340:300,H=170;
+  rr(c,-W/2-10,-H/2-8,W+20,H+18,12);fs(c,p.col,3);
+  rr(c,-W/2,-H/2,W/2,H,6);fs(c,'#fffaf0',2.2);rr(c,0,-H/2,W/2,H,6);fs(c,'#fffaf0',2.2);
+  c.beginPath();c.moveTo(0,-H/2+4);c.lineTo(0,H/2-4);c.strokeStyle='#c9bfae';c.lineWidth=2;c.stroke();
+  if(p.word){/* NONNA: le lettere da copiare, quelle già scritte si colorano */
+    const n=p.keys.length,gap=58;[...p.keys].forEach((l,i)=>{const done=i<p.pos,next=i==p.pos;
+      bigText(c,l,(i-(n-1)/2)*gap,0,62,done?'#e5533d':next?'#ffd23d':'#e8e0d0');});}
+  else{bigText(c,p.keys,-W/4,4,104,'#e5533d');drawIcon(c,FIGURE[p.keys],W/4,4,1.35);}
+  c.restore();
+}
+MISSIONS.push(makeQuiz(o));
+})();
+
+/* ===== Missione 3: i gomitoli di Emma (le sillabe: MA ME MI MO MU, poi le parole) ===== */
+(()=>{
+const BALL={x:470,y:235,r:66};
+const EMMA={x:860,y:345,s:2.3};
+const BASKET={x:735,y:372};
+const YARN=['#e5533d','#4f8fd8','#5cbf60','#ffc93d','#b46ee0','#ff9a3d','#f28cb0','#2f9fa0'];
+const PAROLE3=[['ME','LA','mela'],['LU','NA','luna'],['SO','LE','sole']];
+const yarnSVG=on=>`<svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="9" fill="${on?'#f28cb0':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.6"/><path d="M7 9c4 2 8 2 12 0M6 14c5 2 9 2 14 0M8 19c3 1 7 1 10 0" fill="none" stroke="${on?'#fff':'#cbbf9f'}" stroke-width="1.4"/><path d="M21 17c2 2 2 5 0 6" fill="none" stroke="#3b2a35" stroke-width="1.4"/></svg>`;
+let S={};
+const col=()=>YARN[Math.floor(Math.random()*YARN.length)];
+const sill=(c,v)=>({keys:c+v,parts:[c+v],say:(c+v).toLowerCase(),col:col()});
+
+const o={
+  index:2,who:'emma',name:'I gomitoli di Emma',sub:'LE SILLABE',music:'audio/m3.mp3',
+  rounds:[
+    ()=>shuffle([...'AEIOU']).map(v=>sill('M',v)),
+    ()=>shuffle([...'PLTNS']).map(c=>sill(c,'AEIOU'[Math.floor(Math.random()*5)])),
+    ()=>shuffle(PAROLE3).map(([a,b,w])=>({keys:a+b,parts:[a,b],say:w,word:true,col:col()}))
+  ],
+  reset(){S={ball:null,scarf:[],hop:0};},
+  intro:()=>[`CIAO ${N()}!`,'FACCIO UNA SCIARPA PER MARGHERITA.','OGNI GOMITOLO HA UNA SILLABA.','SCRIVI LA SILLABA CON DUE TASTI!'],
+  between:r=>r==1?['ADESSO LE PAROLE!']:[],
+  ending:()=>['LA SCIARPA È PRONTA!',`GRAZIE ${N()}!`],
+  endText:'Emma ha finito la sciarpa per Margherita!',
+  quest:r=>r==2?'SCRIVI LA PAROLA':'SCRIVI LA SILLABA DEL GOMITOLO',
+  icon:yarnSVG,
+  show(p){S.ball={p,t:0,phase:'in',no:0,rot:0};return 1;},
+  prompt(p){if(p.word)sayList([p.say,...p.parts.map(s=>s.toLowerCase())],900);else sayWord(p.say);},
+  step(p,i,id){const kc=keyCenter(id);burst(kc.x,kc.y,10,['#ffd23d','#fff']);
+    if(p.word&&i==2)sayWord(p.parts[0].toLowerCase());},
+  good(p){const b=S.ball;b.phase='out';b.t=0;S.hop=1;
+    const kc=keyCenter(p.keys[p.keys.length-1]);burst(kc.x,kc.y,16,['#ffd23d','#fff',p.col]);
+    sayWord(p.say);if(p.err==0&&Math.random()<.4)floatText(BALL.x,BALL.y-120,BRAVI(),'#ffd23d');
+    if(p.word){floatText(BALL.x,BALL.y-130,p.keys+'!','#ffd23d',46);return 1.7;}
+    return 1.2;},
+  bad(){if(S.ball)S.ball.no=1;},
+  help(p){o.prompt(p);},
+  update(dt){S.hop=Math.max(0,S.hop-dt*3);const b=S.ball;if(!b)return;b.t+=dt;b.no=Math.max(0,b.no-dt*2);
+    if(b.phase=='out'&&b.t>=.9){S.scarf.push(b.p.col);S.ball=null;sfx.tic();}},
+  draw(c){
+    /* la stanza di Emma: carta da parati a righe, poltrona, cesto della lana */
+    c.fillStyle='#fbe3e8';c.fillRect(-EX,-EY,LW+2*EX,330+EY);
+    c.fillStyle='#f6d2da';for(let x=-Math.ceil(EX/50)*50;x<LW+EX;x+=50)c.fillRect(x,-EY,22,330+EY);
+    /* quadro con una margherita */
+    rr(c,90,60,120,96,6);fs(c,'#c98b55');rr(c,102,72,96,72,3);c.fillStyle='#bfe3a5';c.fill();daisy(c,150,108,22,T*.2);
+    c.fillStyle='#c99a6b';c.fillRect(-EX,330,LW+2*EX,90);c.strokeStyle=OL;c.lineWidth=3;c.beginPath();c.moveTo(-EX,330);c.lineTo(LW+EX,330);c.stroke();
+    /* poltrona */
+    rr(c,770,200,190,150,40);fs(c,'#6a8ff0');rr(c,760,280,40,90,18);fs(c,'#5a7fd8');rr(c,930,280,40,90,18);fs(c,'#5a7fd8');rr(c,790,300,150,50,14);fs(c,'#7f9ff4');
+    drawCat(c,EMMA.x,EMMA.y,CATS.emma,{sit:true,f:-1,t:T,scale:EMMA.s});
+    /* ferri da maglia */
+    c.strokeStyle=OL;c.lineWidth=5;c.beginPath();c.moveTo(800,270);c.lineTo(840,300);c.moveTo(842,262);c.lineTo(812,304);c.stroke();
+    c.strokeStyle='#d9d9e0';c.lineWidth=2.5;c.stroke();
+    drawScarf(c);
+    cesto(c,BASKET.x,BASKET.y,90,false);[['#5cbf60',-18],['#ffc93d',4],['#e5533d',20]].forEach(([k,d])=>gomitolo(c,BASKET.x+d,BASKET.y-12,15,k,d));cesto(c,BASKET.x,BASKET.y,90,true);
+    drawQCat(c,S.hop);
+    if(S.ball)drawBall(c,S.ball);
+  }
+};
+/* la sciarpa scende dai ferri e corre sul pavimento: una riga per ogni sillaba */
+function drawScarf(c){
+  const n=S.scarf.length;if(!n)return;
+  S.scarf.forEach((k,i)=>{const x=812-i*24,y=i==0?318:352;
+    if(i==0){rr(c,800,300,24,44,4);fs(c,k,2.4);}
+    else{rr(c,x,340,24,26,4);fs(c,k,2.4);c.strokeStyle='rgba(255,255,255,.5)';c.lineWidth=2;c.beginPath();c.moveTo(x+6,346);c.lineTo(x+6,360);c.moveTo(x+14,346);c.lineTo(x+14,360);c.stroke();}});
+  /* le frange alla fine */
+  if(n>1){const x=812-(n-1)*24;c.strokeStyle=S.scarf[n-1];c.lineWidth=3;for(let k=0;k<4;k++){c.beginPath();c.moveTo(x,344+k*6);c.lineTo(x-10,346+k*6);c.stroke();}}
+}
+function drawBall(c,b){
+  const p=b.p;let x=BALL.x,y=BALL.y,s=1,rot=0;
+  if(b.phase=='in'){const t=Math.min(1,b.t/.9),e=1-Math.pow(1-t,3);x=-80+(BALL.x+80)*e;rot=(e-1)*6;y=BALL.y-Math.abs(Math.sin(t*Math.PI*2))*30*(1-t);}
+  else{const t=Math.min(1,b.t/.9);x=BALL.x+(BASKET.x-BALL.x)*t;y=BALL.y+(BASKET.y-30-BALL.y)*t-Math.sin(t*Math.PI)*90;s=1-.75*t;rot=t*6;}
+  const sw=b.no&&!RM?Math.sin(b.no*30)*12*b.no:0;
+  if(p.word)drawIcon(c,p.say,x,y-BALL.r-62,1.1);
+  /* il filo che resta indietro */
+  c.beginPath();c.moveTo(x-BALL.r*s*.6,y+BALL.r*s*.7);c.quadraticCurveTo(x-120,y+90,x-200,y+100);c.strokeStyle=p.col;c.lineWidth=3;c.stroke();
+  gomitolo(c,x+sw,y,BALL.r*s,p.col,rot);
+  if(b.phase=='out')return;
+  /* la sillaba: le lettere già scritte diventano gialle; nelle parole un puntino divide le sillabe */
+  /* il cartellino: lettere già scritte rosse, la prossima gialla, le altre grigie (come i libri di nonna Luisa) */
+  const txt=p.word?p.parts.join('·'):p.keys,size=p.word?50:72,w=size*.66,tw=txt.length*w+30;let k=0;
+  rr(c,x+sw-tw/2,y-size*.62,tw,size*1.25,16);fs(c,'#fffaf0',3);
+  [...txt].forEach((ch,i)=>{const cx=x+sw+(i-(txt.length-1)/2)*w;
+    if(ch=='·'){bigText(c,'·',cx,y+4,size,'#b9aea0');return;}
+    bigText(c,ch,cx,y+4,size,k<p.pos?'#e5533d':k==p.pos?'#ffd23d':'#d9cfbf');k++;});
+}
+MISSIONS.push(makeQuiz(o));
+})();
+
+/* ===== Missione 4: l'orto di zio Giulio (contare fino a 9) ===== */
+(()=>{
+const GIULIO={x:885,y:425,s:1.5};
+const BASKET={x:750,y:380};
+const carrotSVG=on=>`<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M9 9l11 2-9 12z" fill="${on?'#ff8a2a':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 9L6 3M11 8l1-6M12 9l5-5" stroke="${on?'#3f9a48':'#cbbf9f'}" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+let S={};
+/* dove spuntano gli ortaggi: una fila fino a 5, due file oltre */
+function spots(n){const rows=n<=5?[n]:[Math.ceil(n/2),Math.floor(n/2)],out=[];
+  rows.forEach((m,r)=>{for(let i=0;i<m;i++)out.push({x:480+(i-(m-1)/2)*92,y:rows.length==1?285:248+r*72});});return out;}
+function pick(from,n){return shuffle(from).slice(0,n);}
+const prova=(n,veg)=>({n,keys:String(n),veg});
+
+function pomodoro(c,x,y,s){c.save();c.translate(x,y);c.scale(s,s);C(c,0,0,16);fs(c,'#e5533d',2.4);E(c,-6,-5,4,3,-.5);c.fillStyle='rgba(255,255,255,.5)';c.fill();
+  c.fillStyle='#3f9a48';for(let i=0;i<5;i++){c.save();c.rotate(i*TAU/5);E(c,0,-14,3,7);c.fill();c.restore();}c.restore();}
+function plant(c,v){
+  const pop=Math.min(1,v.t*5),s=(RM?1:pop*(1+.2*Math.max(0,1-v.t*4)));
+  if(s<=0)return;
+  const hl=v.hl>0,wig=(v.no&&!RM?Math.sin(v.no*30)*.2*v.no:0)+(hl&&!RM?Math.sin(v.hl*20)*.1:0);
+  c.save();c.translate(v.x,v.y);c.rotate(wig);c.scale(s*1.6,s*1.6);
+  if(hl){c.save();c.shadowColor='#ffd23d';c.shadowBlur=24;C(c,0,-10,30);c.fillStyle='rgba(255,230,120,.7)';c.fill();c.restore();}
+  if(v.veg=='carota'){E(c,0,4,22,7);c.fillStyle='#6f4127';c.fill();carrotTop(c,0,0,true);}
+  else{rr(c,-2,-40,4,42,2);c.fillStyle='#3f9a48';c.fill();E(c,-10,-26,9,4,-.4);E(c,10,-34,9,4,.4);c.fillStyle='#4caf50';c.fill();pomodoro(c,0,-10,1.1);}
+  c.restore();
+  if(v.num)bigText(c,String(v.num),v.x,v.y-84,38,'#fff');
+}
+const o={
+  index:3,who:'giulio',name:"L'orto di zio Giulio",sub:'CONTARE',music:'audio/m4.mp3',
+  rounds:[
+    ()=>shuffle([1,2,3,4,5]).map(n=>prova(n,'carota')),
+    ()=>pick([3,4,5,6,7,8,9],5).map(n=>prova(n,'carota')),
+    ()=>pick([4,5,6,7,8,9],4).map(n=>prova(n,'pomodoro'))
+  ],
+  reset(){S={veg:[],flying:[],basket:[],hop:0,wave:0,first:true};},
+  intro:()=>[`CIAO ${N()}!`,'RACCOGLIAMO LE CAROTE!','CONTA LE CAROTE.','PREMI IL NUMERO GIUSTO!'],
+  between:r=>r==1?['ADESSO I POMODORI!']:[],
+  ending:()=>['CHE BEL CESTO!',`GRAZIE ${N()}!`],
+  endText:'Il cesto di zio Giulio è pieno di carote e pomodori!',
+  quest:r=>r==2?'QUANTI POMODORI? PREMI IL NUMERO':'QUANTE CAROTE? PREMI IL NUMERO',
+  icon:carrotSVG,
+  show(p){S.veg=spots(p.n).map((s,i)=>({...s,veg:p.veg,t:-i*.14,hl:0,no:0,num:0}));return .5+p.n*.14;},
+  prompt(p){say(p.veg=='carota'?'QUANTE CAROTE?':'QUANTI POMODORI?','giulio');},
+  step(){},
+  /* giusto: si contano a voce mentre saltano nel cesto */
+  good(p){S.hop=1;S.wave=1.5;const kc=keyCenter(p.keys);burst(kc.x,kc.y,16,['#ffd23d','#fff','#ff8a2a']);
+    S.veg.forEach((v,i)=>o.Q.after(.35+i*.6,()=>{v.num=i+1;sayWord(NOME[i+1]);
+      o.Q.after(.3,()=>{S.flying.push({x:v.x,y:v.y-10,veg:v.veg,t:0,fx:v.x,fy:v.y-10});v.gone=true;});}));
+    o.Q.after(.35+p.n*.6+.3,()=>{floatText(480,150,String(p.n)+'!','#ffd23d',70);if(p.err==0&&Math.random()<.5)floatText(480,90,BRAVI(),'#fff');});
+    return .35+p.n*.6+1.2;},
+  bad(p){S.veg.forEach(v=>v.no=1);},
+  /* dopo due errori zio Giulio li conta insieme, uno alla volta (senza raccoglierli) */
+  help(p){S.veg.forEach((v,i)=>o.Q.after(i*.7,()=>{v.hl=.6;sayWord(NOME[i+1]);}));},
+  update(dt){S.hop=Math.max(0,S.hop-dt*3);S.wave=Math.max(0,S.wave-dt);
+    S.veg.forEach(v=>{v.t+=dt;v.hl=Math.max(0,v.hl-dt);v.no=Math.max(0,v.no-dt*2);});
+    S.flying.forEach(f=>{f.t+=dt/.55;const t=Math.min(1,f.t);f.x=f.fx+(BASKET.x-f.fx)*t;f.y=f.fy+(BASKET.y-20-f.fy)*t-Math.sin(t*Math.PI)*120;});
+    S.flying.forEach(f=>{if(f.t>=1)S.basket.push(f.veg);});S.flying=S.flying.filter(f=>f.t<1);
+    S.veg=S.veg.filter(v=>!v.gone);},
+  draw(c){
+    /* cielo, colline, orto con la staccionata */
+    c.fillStyle='#bfe6ff';c.fillRect(-EX,-EY,LW+2*EX,230+EY);
+    drawIcon(c,'sole',140,80,1.1);
+    [[150,230,260,'#8fd36a'],[560,230,330,'#7cc65a'],[960,230,260,'#8fd36a']].forEach(([x,y,r,k])=>{E(c,x,y,r,70);c.fillStyle=k;c.fill();});
+    c.fillStyle='#8a5a36';c.fillRect(-EX,210,LW+2*EX,130);
+    c.strokeStyle='#74482c';c.lineWidth=3;for(let y=232;y<336;y+=26){c.beginPath();c.moveTo(-EX,y);c.lineTo(LW+EX,y);c.stroke();}
+    c.fillStyle='#6aa94b';c.fillRect(-EX,330,LW+2*EX,90);c.strokeStyle=OL;c.lineWidth=3;c.beginPath();c.moveTo(-EX,330);c.lineTo(LW+EX,330);c.stroke();
+    c.beginPath();c.moveTo(-EX,208);c.lineTo(LW+EX,208);c.strokeStyle=OL;c.lineWidth=8;c.stroke();c.strokeStyle='#e8d2a8';c.lineWidth=4;c.stroke();
+    for(let px=-Math.ceil(EX/40)*40;px<=LW+EX;px+=40){c.beginPath();c.moveTo(px-5,214);c.lineTo(px-5,190);c.lineTo(px,184);c.lineTo(px+5,190);c.lineTo(px+5,214);c.closePath();fs(c,'#f7ead0',2.2);}
+    c.save();c.translate(GIULIO.x,GIULIO.y);c.scale(GIULIO.s,GIULIO.s);drawPerson(c,0,0,{kind:'giulio',t:T,wave:S.wave>0});c.restore();
+    cesto(c,BASKET.x,BASKET.y,110,false);
+    S.basket.slice(-12).forEach((v,i)=>{const a=(i%6)/5-.5,row=Math.floor(i/6);v=='carota'?carrot(c,BASKET.x+a*70,BASKET.y-30-row*8,a*.8):pomodoro(c,BASKET.x+a*70,BASKET.y-24-row*8,.7);});
+    cesto(c,BASKET.x,BASKET.y,110,true);
+    drawQCat(c,S.hop);
+    S.veg.forEach(v=>plant(c,v));
+    S.flying.forEach(f=>f.veg=='carota'?(c.save(),c.translate(f.x,f.y),c.scale(2,2),carrot(c,0,0,f.t*8),c.restore()):pomodoro(c,f.x,f.y,1.2));
+  }
+};
+MISSIONS.push(makeQuiz(o));
+})();
+
+/* ===== Missione 5: il pollaio di zia Mile (le addizioni fino a 9: 2 + 3 = ?) ===== */
+(()=>{
+const MILE={x:885,y:425,s:1.5};
+const NESTS=[{x:350,y:330},{x:610,y:330}];
+const BOARD={x:540,y:112,w:310,h:116};
+const eggSVG=on=>`<svg viewBox="0 0 26 26" aria-hidden="true"><ellipse cx="13" cy="14" rx="8" ry="10" fill="${on?'#fff8ec':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.6"/><ellipse cx="10" cy="10" rx="2" ry="3" fill="${on?'#fff':'#efe5cf'}"/></svg>`;
+let S={};
+/* posti delle uova dentro il nido: fino a 5 */
+const EGG_POS=[[-42,0],[0,0],[42,0],[-21,-44],[21,-44]];
+function sums(lo,hi,maxA,maxB,n){const all=[];for(let a=1;a<=maxA;a++)for(let b=1;b<=maxB;b++)if(a+b>=lo&&a+b<=hi)all.push([a,b]);return shuffle(all).slice(0,n).map(([a,b])=>({a,b,keys:String(a+b)}));}
+
+function nest(c,x,y){E(c,x,y,64,20);fs(c,'#e8c66a',2.6);c.strokeStyle='#c9a24a';c.lineWidth=1.8;for(let k=-50;k<=50;k+=10){c.beginPath();c.moveTo(x+k-5,y-10);c.lineTo(x+k+5,y+8);c.stroke();}}
+const o={
+  index:4,who:'mile',name:'Il pollaio di zia Mile',sub:'PIÙ',music:'audio/m5.mp3',
+  rounds:[()=>sums(2,5,3,2,5),()=>sums(3,7,4,3,5),()=>sums(6,9,5,4,5)],
+  reset(){S={eggs:[],hop:0,wave:0,hen:0,res:null,pi:0,p:null};},
+  intro:()=>[`CIAO ${N()}!`,'LE GALLINE FANNO LE UOVA.','CONTA TUTTE LE UOVA!','QUANTE UOVA IN TUTTO?'],
+  between:r=>r==1?['ADESSO TANTE UOVA!']:[],
+  ending:()=>['CHE BELLE UOVA!','FACCIAMO LA FRITTATA.',`GRAZIE ${N()}!`],
+  endText:'Zia Mile fa una frittata gigante con tutte le uova!',
+  quest:()=>'QUANTE UOVA IN TUTTO? PREMI IL NUMERO',
+  icon:eggSVG,
+  show(p){S.p=p;S.res=null;S.eggs=[];
+    for(let i=0;i<p.a;i++)S.eggs.push({n:0,i,t:-i*.15,hl:0});
+    for(let i=0;i<p.b;i++)S.eggs.push({n:1,i,t:-(p.a*.15+.5+i*.35),hl:0,laid:true});
+    o.Q.after(p.a*.15+.4,()=>{S.hen=p.b*.35+.3;});
+    return p.a*.15+.6+p.b*.35;},
+  prompt(p){sayList([NOME[p.a],'più',NOME[p.b]],750);},
+  step(){},
+  /* giusto: si contano tutte le uova, una alla volta */
+  good(p){S.hop=1;S.wave=1.6;const kc=keyCenter(p.keys);burst(kc.x,kc.y,16,['#ffd23d','#fff']);
+    S.eggs.forEach((e,i)=>o.Q.after(i*.5,()=>{e.hl=.7;e.num=i+1;sayWord(NOME[i+1]);}));
+    const sum=p.a+p.b;o.Q.after(sum*.5+.2,()=>{S.res=sum;sayList(['fa',NOME[sum]],600);floatText(BOARD.x,BOARD.y-60,p.err==0&&Math.random()<.5?BRAVI():'',"#ffd23d");});
+    return sum*.5+1.8;},
+  bad(){S.eggs.forEach(e=>e.no=1);},
+  help(p){S.eggs.forEach((e,i)=>o.Q.after(i*.7,()=>{e.hl=.6;sayWord(NOME[i+1]);}));},
+  update(dt){S.hop=Math.max(0,S.hop-dt*3);S.wave=Math.max(0,S.wave-dt);S.hen=Math.max(0,S.hen-dt);
+    S.eggs.forEach(e=>{const was=e.t;e.t+=dt;e.hl=Math.max(0,e.hl-dt);e.no=Math.max(0,(e.no||0)-dt*2);if(e.laid&&was<0&&e.t>=0)sfx.tic();});},
+  draw(c){
+    /* aia: cielo, prato, pollaio */
+    c.fillStyle='#cdeeff';c.fillRect(-EX,-EY,LW+2*EX,250+EY);
+    [[90,70],[700,50]].forEach(([x,y])=>drawIcon(c,'nuvola',x,y,1.3));
+    c.fillStyle='#8fd36a';c.fillRect(-EX,250,LW+2*EX,170);c.strokeStyle='#7cc65a';c.lineWidth=3;
+    for(let x=-Math.ceil(EX/37)*37;x<LW+EX;x+=37){c.beginPath();c.moveTo(x,300+(x%3)*20);c.lineTo(x+4,290+(x%3)*20);c.stroke();}
+    drawCoop(c,105,300);
+    c.save();c.translate(MILE.x,MILE.y);c.scale(MILE.s,MILE.s);drawPerson(c,0,0,{kind:'mile',t:T,wave:S.wave>0});c.restore();
+    drawBoard(c);
+    NESTS.forEach(n=>nest(c,n.x,n.y));
+    /* la gallina che fa le uova nel secondo nido */
+    const lay=S.hen>0&&!RM,hb=lay?Math.abs(Math.sin(T*10))*8:0;
+    hen(c,NESTS[1].x+116,NESTS[1].y+4-hb,-1,['#fff4e0','#e9d6b8'],{s:2,t:T,peck:!lay,k:1});
+    if(S.p)bigText(c,'+',(NESTS[0].x+NESTS[1].x)/2,NESTS[0].y-14,56,'#fff');
+    S.eggs.forEach(e=>{if(e.t<0)return;const n=NESTS[e.n],[dx,dy]=EGG_POS[e.i],pop=RM?1:Math.min(1,e.t*5),
+      wig=e.no&&!RM?Math.sin(e.no*30)*4*e.no:0,hy=e.laid?-Math.max(0,1-e.t*3)*50:0;
+      uovo(c,n.x+dx+wig,n.y+dy-12+hy,1.3*pop,e.hl>0);
+      if(e.num)bigText(c,String(e.num),n.x+dx,n.y+dy-46,26,'#fff');});
+    drawQCat(c,S.hop);
+  }
+};
+/* la lavagnetta con il conto */
+function drawBoard(c){const {x,y,w,h}=BOARD;
+  rr(c,x-w/2,y-h/2,w,h,10);fs(c,'#b0743f',3);rr(c,x-w/2+10,y-h/2+10,w-20,h-20,6);c.fillStyle='#2f4a3a';c.fill();
+  const p=S.p;if(!p)return;
+  const txt=`${p.a} + ${p.b} = ${S.res==null?'?':S.res}`;
+  c.save();c.font='700 64px Fredoka, system-ui, sans-serif';c.textAlign='center';c.textBaseline='middle';
+  c.fillStyle=S.res==null?'#f6f1e4':'#ffd23d';c.fillText(txt,x,y+4);c.restore();}
+function drawCoop(c,x,y){shadowAt(c,x,y+4,90,12);
+  rr(c,x-70,y-80,140,80,4);fs(c,'#e9c27a');c.strokeStyle='#cfa25c';c.lineWidth=2;for(let k=x-56;k<x+70;k+=18){c.beginPath();c.moveTo(k,y-78);c.lineTo(k,y-2);c.stroke();}
+  c.beginPath();c.moveTo(x-86,y-74);c.lineTo(x,y-124);c.lineTo(x+86,y-74);c.closePath();fs(c,'#d0623c');
+  c.beginPath();c.moveTo(x-20,y);c.lineTo(x-20,y-36);c.arc(x,y-36,20,Math.PI,0);c.lineTo(x+20,y);c.closePath();fs(c,'#5a3a2a');
+  hen(c,x+6,y-120,1,['#e5533d','#b0402a'],{rooster:true,t:T,s:.9});}
+MISSIONS.push(makeQuiz(o));
+})();
+
+/* ===== Avvio: schermate, tastiera vera e toccata, ciclo del gioco ===== */
 const $=id=>document.getElementById(id);
 const starSVG=on=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="${on?'#ffc93d':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
 
@@ -783,7 +1268,7 @@ function show(scr){
 function goIntro(){show('intro');introReset();}
 function goMenu(){
   if(dlg){dlg=null;$('dlg').hidden=true;document.body.classList.remove('talking');}
-  stopVoice();M=null;show('menu');floats=[];parts=[];playMusic('audio/intro.mp3');
+  stopVoice();sayTimers.forEach(clearTimeout);M=null;show('menu');floats=[];parts=[];playMusic('audio/intro.mp3');
   $('levels').innerHTML=MISSIONS.map((m,i)=>`<button class="lvl" data-m="${i}" ${m.ready?'':'disabled'}><b>${i+1}</b><span>${m.name}<small>${m.sub}</small>${m.ready?(SAVE.stelle[i]?`<i>${'★'.repeat(SAVE.stelle[i])}</i>`:''):'<i>PRESTO!</i>'}</span></button>`).join('');
   $('levels').querySelectorAll('.lvl').forEach(b=>b.onclick=()=>play(+b.dataset.m));
 }
@@ -851,7 +1336,7 @@ setCat(SAVE.cur);$('bMus').classList.toggle('on',musicOn);
 drawPortraits();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawPortraits);
 goIntro();music.src='audio/intro.mp3';if(musicOn)music.play().catch(()=>{});
 requestAnimationFrame(frame);
-if(location.hash=='#debug')window.__ttm={get SCR(){return SCR;},play,goMenu,pressKey,SAVE,step:dt=>{T+=dt;update(dt);}};
+if(location.hash=='#debug')window.__ttm={get SCR(){return SCR;},play,goMenu,pressKey,SAVE,step:dt=>{T+=dt;update(dt);},get target(){return M&&M.kbOpts?M.kbOpts().target:null;}};
 
 })();
 </script>
