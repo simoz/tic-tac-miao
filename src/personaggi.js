@@ -11,7 +11,7 @@ function shade(h){const n=parseInt(h.slice(1),16),f=.82;return 'rgb('+[(n>>16)&2
 const CATS={
   maci:{name:'MACI',body:'#2b2930',belly:'#ffffff',ear:'#f4a6b6',eye:'#e9dc6a',kind:'maci'},
   piumi:{name:'PIUMI',body:'#a2978c',belly:'#f3ece2',ear:'#f4b0b0',eye:'#f2d34a',kind:'piumi'},
-  emma:{name:'NONNA EMMA',body:'#a8804f',belly:'#fff8ef',ear:'#f0b3a6',eye:'#9cc06a',kind:'emma'}
+  emma:{name:'EMMA',body:'#a8804f',belly:'#fff8ef',ear:'#f0b3a6',eye:'#9cc06a',kind:'emma'}
 };
 
 /* ---------- personaggi ---------- */

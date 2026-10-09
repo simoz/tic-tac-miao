@@ -1,6 +1,6 @@
 /* ===== Avvio: schermate, tastiera vera e toccata, ciclo del gioco ===== */
 /* le missioni che arriveranno */
-[['I libri di nonna Luisa','LE LETTERE'],['I gomitoli di nonna Emma','LE SILLABE'],["L'orto di zio Giulio",'CONTARE'],['Il pollaio di zia Mile','PIÙ'],
+[['I libri di nonna Luisa','LE LETTERE'],['I gomitoli di Emma','LE SILLABE'],["L'orto di zio Giulio",'CONTARE'],['Il pollaio di zia Mile','PIÙ'],
  ['I mirtilli di nonna Lucy','MENO'],['Le bolle di papà','LE PAROLE'],['La festa di Margherita e Rebecca','IL DETTATO']].forEach(([name,sub])=>MISSIONS.push({name,sub,ready:false}));
 
 const $=id=>document.getElementById(id);

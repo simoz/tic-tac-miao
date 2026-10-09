@@ -73,7 +73,7 @@ function ttsSay(t,who){try{speechSynthesis.cancel();
   const p=VOX[who]||VOX.cat;u.pitch=p.pitch;u.rate=p.rate;speechSynthesis.speak(u);}catch(e){}}
 
 /* ---------- dialoghi (OK si preme anche con INVIO) ---------- */
-const NAMES={emma:'NONNA EMMA',girl:'MARGHERITA',simone:'ZIO SIMONE'};
+const NAMES={emma:'EMMA',girl:'MARGHERITA',simone:'ZIO SIMONE'};
 const PORTRAIT={
   emma:p=>{p.setTransform(2.6,0,0,2.6,0,0);drawCat(p,30,74,CATS.emma,{sit:true,f:1,t:0,noShadow:true});},
   girl:p=>{p.setTransform(2.4,0,0,2.4,0,0);drawGirl(p,38,148,{t:0,noShadow:true});},

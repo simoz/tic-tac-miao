@@ -203,7 +203,7 @@ function ttsSay(t,who){try{speechSynthesis.cancel();
   const p=VOX[who]||VOX.cat;u.pitch=p.pitch;u.rate=p.rate;speechSynthesis.speak(u);}catch(e){}}
 
 /* ---------- dialoghi (OK si preme anche con INVIO) ---------- */
-const NAMES={emma:'NONNA EMMA',girl:'MARGHERITA',simone:'ZIO SIMONE'};
+const NAMES={emma:'EMMA',girl:'MARGHERITA',simone:'ZIO SIMONE'};
 const PORTRAIT={
   emma:p=>{p.setTransform(2.6,0,0,2.6,0,0);drawCat(p,30,74,CATS.emma,{sit:true,f:1,t:0,noShadow:true});},
   girl:p=>{p.setTransform(2.4,0,0,2.4,0,0);drawGirl(p,38,148,{t:0,noShadow:true});},
@@ -265,7 +265,7 @@ function shade(h){const n=parseInt(h.slice(1),16),f=.82;return 'rgb('+[(n>>16)&2
 const CATS={
   maci:{name:'MACI',body:'#2b2930',belly:'#ffffff',ear:'#f4a6b6',eye:'#e9dc6a',kind:'maci'},
   piumi:{name:'PIUMI',body:'#a2978c',belly:'#f3ece2',ear:'#f4b0b0',eye:'#f2d34a',kind:'piumi'},
-  emma:{name:'NONNA EMMA',body:'#a8804f',belly:'#fff8ef',ear:'#f0b3a6',eye:'#9cc06a',kind:'emma'}
+  emma:{name:'EMMA',body:'#a8804f',belly:'#fff8ef',ear:'#f0b3a6',eye:'#9cc06a',kind:'emma'}
 };
 
 /* ---------- personaggi ---------- */
@@ -597,7 +597,7 @@ function introUpdate(dt){
   IN.typed.forEach(l=>l.t+=dt);
 }
 function introDraw(c){
-  /* sfondo: la casa di nonna Emma, con Margherita e nonna Emma che guardano */
+  /* sfondo: la casa di Emma, con Margherita e Emma che guardano */
   c.fillStyle='#ffefc4';c.fillRect(-EX,-EY,LW+2*EX,420+EY);
   c.fillStyle='#ffe3a6';for(let x=-Math.ceil(EX/40)*40;x<LW+EX;x+=40)c.fillRect(x,0,16,330);
   c.fillStyle='#c99a6b';c.fillRect(-EX,330,LW+2*EX,90);c.strokeStyle=OL;c.lineWidth=3;c.beginPath();c.moveTo(-EX,330);c.lineTo(LW+EX,330);c.stroke();
@@ -770,7 +770,7 @@ MISSIONS.push({
 
 /* ===== Avvio: schermate, tastiera vera e toccata, ciclo del gioco ===== */
 /* le missioni che arriveranno */
-[['I libri di nonna Luisa','LE LETTERE'],['I gomitoli di nonna Emma','LE SILLABE'],["L'orto di zio Giulio",'CONTARE'],['Il pollaio di zia Mile','PIÙ'],
+[['I libri di nonna Luisa','LE LETTERE'],['I gomitoli di Emma','LE SILLABE'],["L'orto di zio Giulio",'CONTARE'],['Il pollaio di zia Mile','PIÙ'],
  ['I mirtilli di nonna Lucy','MENO'],['Le bolle di papà','LE PAROLE'],['La festa di Margherita e Rebecca','IL DETTATO']].forEach(([name,sub])=>MISSIONS.push({name,sub,ready:false}));
 
 const $=id=>document.getElementById(id);

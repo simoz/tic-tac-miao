@@ -18,7 +18,7 @@ function introUpdate(dt){
   IN.typed.forEach(l=>l.t+=dt);
 }
 function introDraw(c){
-  /* sfondo: la casa di nonna Emma, con Margherita e nonna Emma che guardano */
+  /* sfondo: la casa di Emma, con Margherita e Emma che guardano */
   c.fillStyle='#ffefc4';c.fillRect(-EX,-EY,LW+2*EX,420+EY);
   c.fillStyle='#ffe3a6';for(let x=-Math.ceil(EX/40)*40;x<LW+EX;x+=40)c.fillRect(x,0,16,330);
   c.fillStyle='#c99a6b';c.fillRect(-EX,330,LW+2*EX,90);c.strokeStyle=OL;c.lineWidth=3;c.beginPath();c.moveTo(-EX,330);c.lineTo(LW+EX,330);c.stroke();
