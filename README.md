@@ -35,7 +35,7 @@ Dopo due errori il personaggio aiuta: ripete la lettera, o conta insieme le caro
 - `genera-voci.sh`: genera con edge-tts le frasi e le parole che mancano
 
 ## Crediti
-- Musiche create con [Suno](https://suno.com): intro provvisoria ("Meow" da Maci e Piumi), m1–m5 per le missioni
+- Musiche create con [Suno](https://suno.com): intro ["Tic Tac Miao"](https://suno.com/song/bed1a931-18e2-4a2d-9fc2-ee12973a0a85) (in `audio/intro.mp3` c'è ancora "Meow" di Maci e Piumi finché non si scarica l'mp3), m1–m5 per le missioni
 - Voci con edge-tts: zio Simone (Diego), nonna Luisa e zia Mile (Isabella), zio Giulio (Giuseppe), lettere e numeri (Elsa). Le frasi già presenti in Maci e Piumi sono le stesse.
 - Voce di Emma: le frasi di Maci e Piumi sono fatte con [ElevenLabs](https://elevenlabs.io); quelle nuove per ora sono provvisorie (Elsa)
 - Font: [Fredoka](https://fonts.google.com/specimen/Fredoka)
