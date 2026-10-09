@@ -1,0 +1,123 @@
+<title>Tic Tac Miao</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
+<style>
+/* Come Maci e Piumi: canvas a tutto schermo, pannelli da libro illustrato negli angoli, dialogo in alto (in basso c'è la tastiera) */
+:root{
+  --ink:#3b2a35; --paper:#fff4dc; --paper-2:#f3dcae; --red:#e5533d; --gold:#ffc93d;
+  --leaf:#4caf50; --muted:#8a6f60;
+  --display:'Fredoka','Baloo 2','Trebuchet MS',system-ui,sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;overflow:hidden;background:#4a4252;color:var(--ink);font-family:var(--display);-webkit-user-select:none;user-select:none}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+button{font-family:var(--display);color:var(--ink);cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.panel{background:var(--paper);border:3px solid var(--ink);border-radius:16px;box-shadow:0 5px 0 var(--ink)}
+.quest{position:fixed;left:12px;top:calc(12px + env(safe-area-inset-top,0px));padding:10px 14px;max-width:min(330px,calc(100% - 330px));display:flex;flex-direction:column;gap:6px}
+.tag{align-self:flex-start;background:var(--red);color:#fff;font-weight:600;font-size:13px;letter-spacing:.08em;padding:2px 10px;border-radius:99px;border:2px solid var(--ink)}
+#questText{font-weight:700;font-size:clamp(16px,2.3vw,22px);line-height:1.15;letter-spacing:.02em;text-wrap:balance}
+#questProg{display:flex;gap:4px;flex-wrap:wrap}
+#questProg svg{width:26px;height:26px}
+.party{position:fixed;right:12px;top:calc(12px + env(safe-area-inset-top,0px));display:flex;gap:8px;z-index:3}
+.pc{display:flex;flex-direction:column;align-items:center;padding:4px 6px 6px;background:var(--paper-2);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);font-weight:700;font-size:13px;letter-spacing:.05em;transition:transform .12s}
+.pc canvas{width:48px;height:48px}
+.pc.on{background:var(--gold);transform:translateY(-2px)}
+.pc.mus svg{width:48px;height:48px;padding:8px;box-sizing:border-box}
+.pc.mus.on{background:var(--paper-2);transform:none}
+.pc.mus.on .x{display:none}
+.pc:active{transform:translateY(2px);box-shadow:0 2px 0 var(--ink)}
+.dialog{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));width:min(720px,calc(100% - 24px));box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:12px 14px;z-index:4}
+.pic{flex:none;width:92px;height:92px;border-radius:50%;background:#bfe3a5;border:3px solid var(--ink);overflow:hidden}
+.pic canvas{width:100%;height:100%}
+.dbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.dname{align-self:flex-start;background:var(--gold);border:2px solid var(--ink);border-radius:99px;padding:1px 10px;font-weight:600;font-size:14px;letter-spacing:.06em}
+.dtext{font-weight:700;font-size:clamp(20px,3.4vw,30px);line-height:1.15;letter-spacing:.02em}
+.dbtns{display:flex;flex-direction:column;gap:8px}
+.btn{border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);font-weight:700;font-size:20px;padding:8px 16px;background:var(--leaf);color:#fff}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.ghost{background:var(--paper-2);color:var(--ink);padding:6px 10px;display:grid;place-items:center}
+.btn.ghost svg{width:26px;height:26px}
+.btn small{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;opacity:.9}
+body.talking .quest{visibility:hidden}
+body:not(.play) .quest,body:not(.play) #bBack{display:none}
+body.intro .party .pc:not(.mus){display:none}
+/* GIOCA: sotto il titolo che i gatti scrivono sulla tastiera */
+#start{position:fixed;left:50%;top:var(--gy,50%);transform:translate(-50%,-50%)}
+#bPlay{font-size:34px;padding:10px 40px;background:#f28c28}
+.overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(40,25,45,.35);padding:16px;overflow:auto}
+.card{position:relative;text-align:center;padding:30px 24px 22px;max-width:620px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.ribbon{position:absolute;top:-18px;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:10px;padding:3px 16px;font-weight:700;letter-spacing:.12em;font-size:15px}
+.card h1{margin:4px 0 0;font-weight:700;font-size:clamp(30px,6vw,44px);line-height:1.02;color:var(--ink)}
+.card h1 em{font-style:normal;color:var(--red)}
+.card p{margin:0;font-size:17px;color:var(--muted);font-weight:500;max-width:34ch}
+.levels{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:6px}
+.lvl{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--paper-2);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);text-align:left}
+.lvl:not(:disabled):hover{background:var(--gold)}
+.lvl:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.lvl:disabled{opacity:.55;cursor:default}
+.lvl b{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:#fff8e6;border:3px solid var(--ink);box-shadow:0 3px 0 var(--ink);font-size:22px}
+.lvl span{display:flex;flex-direction:column;font-weight:600;font-size:17px;line-height:1.1}
+.lvl small{font-size:13px;color:var(--muted);letter-spacing:.06em}
+.lvl i{font-style:normal;color:#e08a00;font-size:15px;letter-spacing:.1em}
+.card .btn{font-size:24px;padding:10px 30px;background:#f28c28;margin-top:6px}
+.card .btn.alt{background:var(--leaf);font-size:20px;padding:8px 24px;margin-top:0}
+.link{background:none;border:0;font-weight:600;font-size:15px;color:var(--muted);text-decoration:underline;padding:4px}
+.stars{display:flex;gap:6px}
+.stars svg{width:52px;height:52px}
+@media (max-width:560px){.pic{width:60px;height:60px}.dialog{gap:10px;padding:10px}.btn{font-size:18px;padding:6px 12px}.pc canvas,.pc.mus svg{width:38px;height:38px}.quest{max-width:calc(100% - 250px)}.party{gap:5px}.levels{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.pc{transition:none}}
+</style>
+
+<canvas id="game" aria-label="Il gioco: una tastiera e i personaggi"></canvas>
+
+<div class="quest panel" id="quest" aria-live="polite">
+  <span class="tag" id="questTag">ZAMPA PICCOLA</span>
+  <div id="questText"></div>
+  <div id="questProg"></div>
+</div>
+
+<div class="party">
+  <button class="pc mus" id="bBack" aria-label="Torna alle missioni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>MISSIONI</button>
+  <button class="pc on" id="bMaci" aria-label="Gioca con Maci"><canvas width="96" height="96"></canvas>MACI</button>
+  <button class="pc" id="bPiumi" aria-label="Gioca con Piumi"><canvas width="96" height="96"></canvas>PIUMI</button>
+  <button class="pc mus on" id="bMus" aria-label="Accendi o spegni la musica" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="3" fill="currentColor"/><circle cx="17.5" cy="16" r="3" fill="currentColor"/><path class="x" d="M3 3l18 18" stroke="#e5533d" stroke-width="3" stroke-linecap="round"/></svg>MUSICA</button>
+</div>
+
+<div class="dialog panel" id="dlg" hidden>
+  <div class="pic"><canvas id="dlgPic" width="184" height="184"></canvas></div>
+  <div class="dbody"><span class="dname" id="dName"></span><div class="dtext" id="dText"></div></div>
+  <div class="dbtns">
+    <button class="btn ghost" id="dSay" aria-label="Ascolta la frase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+    <button class="btn" id="dOk">OK<small>INVIO ⏎</small></button>
+  </div>
+</div>
+
+<div id="start"><button class="btn" id="bPlay">&#9654; GIOCA<small>INVIO ⏎</small></button></div>
+
+<div class="overlay" id="menu" hidden>
+  <div class="card panel">
+    <span class="ribbon">SCEGLI LA MISSIONE</span>
+    <h1><em>Tic Tac</em> Miao</h1>
+    <p>Premi il numero della missione, oppure toccala.</p>
+    <div class="levels" id="levels"></div>
+  </div>
+</div>
+
+<div class="overlay" id="end" hidden>
+  <div class="card panel">
+    <span class="ribbon">MISSIONE COMPIUTA</span>
+    <div class="stars" id="stars"></div>
+    <h1>MIAO&#8209;RAVIGLIOSO!</h1>
+    <p id="endText"></p>
+    <button class="btn" id="again">GIOCA ANCORA<small>INVIO ⏎</small></button>
+    <button class="link" id="toMenu">Torna alle missioni</button>
+  </div>
+</div>
+
+<script>
+/*SCRIPTS*/
+</script>
