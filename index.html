@@ -770,8 +770,8 @@ MISSIONS.push({
 
 /* ===== Avvio: schermate, tastiera vera e toccata, ciclo del gioco ===== */
 /* le missioni che arriveranno */
-[['I libri di zia Silvia','LE LETTERE'],['I gomitoli di nonna Emma','LE SILLABE'],["L'orto di zio Giulio",'CONTARE'],['Il pollaio di zia Mile','PIÙ'],
- ['I mirtilli di nonna Lucy','MENO'],['Le bolle di papà Andrea','LE PAROLE'],['La festa di Margherita e Rebecca','IL DETTATO']].forEach(([name,sub])=>MISSIONS.push({name,sub,ready:false}));
+[['I libri di nonna Luisa','LE LETTERE'],['I gomitoli di nonna Emma','LE SILLABE'],["L'orto di zio Giulio",'CONTARE'],['Il pollaio di zia Mile','PIÙ'],
+ ['I mirtilli di nonna Lucy','MENO'],['Le bolle di papà','LE PAROLE'],['La festa di Margherita e Rebecca','IL DETTATO']].forEach(([name,sub])=>MISSIONS.push({name,sub,ready:false}));
 
 const $=id=>document.getElementById(id);
 const starSVG=on=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="${on?'#ffc93d':'#e4d6b8'}" stroke="#3b2a35" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
